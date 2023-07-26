@@ -13,11 +13,11 @@
     };
   };
 
-  outputs = inputs@{ flake-parts, pre-commit-hooks, nixpkgs, ... }:
+  outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
       ];
-      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
         packages = {
           dae = pkgs.callPackage ./dae/package.nix { };
@@ -29,10 +29,9 @@
             hooks = { nixpkgs-fmt.enable = true; };
           };
         };
-
       };
       flake = {
-        nixosModules = { dae = import ./dae/module.nix; };
+        nixosModules = { dae = import ./dae/module.nix inputs; };
         overlays = rec {
           default = dae;
           dae = final: prev: { dae = inputs.self.packages.dae; };

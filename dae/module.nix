@@ -1,18 +1,32 @@
-{ config, lib, pkgs, ... }:
+inputs: { config, lib, pkgs, ... }:
 
 let
   cfg = config.services.dae;
+  defaultDaePackage = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dae;
 in
 {
   options = {
-    services.dae = {
-      enable = lib.mkEnableOption (lib.mkDoc "A Linux high-performance transparent proxy solution based on eBPF");
+    services.dae = with lib;{
+      enable = mkEnableOption (mkDoc "A Linux high-performance transparent proxy solution based on eBPF");
 
-      package = lib.mkPackageOptionMD pkgs "dae" { };
+      package = mkOption {
+        type = types.path;
+        default = defaultDaePackage;
+        defaultText = literalExpression ''
+          dae.packages.${pkgs.stdenv.hostPlatform.system}.dae
+        '';
+        example = literalExpression "pkgs.dae";
+        description = mdDoc ''
+          The dae package to use.
+        '';
+      };
 
       configFilePath = lib.mkOption {
         type = lib.types.path;
         default = "/etc/dae/config.dae";
+        description = mdDoc ''
+          The path of dae config file, end with `.dae`.
+        '';
       };
 
       disableTxChecksumIpGeneric = lib.mkEnableOption (lib.mkDoc "See https://github.com/daeuniverse/dae/issues/43");
