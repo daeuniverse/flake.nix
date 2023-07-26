@@ -32,7 +32,7 @@
 
       };
       flake = {
-        nixosModules = { dae = import ./dae/module.nix { }; };
+        nixosModules = { dae = import ./dae/module.nix; };
         overlays = rec {
           default = dae;
           dae = final: prev: { dae = inputs.self.packages.dae; };
