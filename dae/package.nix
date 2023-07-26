@@ -1,10 +1,6 @@
 { clang
 , fetchFromGitHub
-, symlinkJoin
 , buildGoModule
-, makeWrapper
-, v2ray-geoip
-, v2ray-domain-list-community
 }:
 buildGoModule rec {
   pname = "dae";
@@ -22,7 +18,7 @@ buildGoModule rec {
 
   proxyVendor = true;
 
-  nativeBuildInputs = [ clang makeWrapper ];
+  nativeBuildInputs = [ clang ];
 
   ldflags = [
     "-s"
@@ -39,11 +35,6 @@ buildGoModule rec {
 
   # network required
   doCheck = false;
-
-  assetsDrv = symlinkJoin {
-    name = "dae-assets";
-    paths = [ v2ray-geoip v2ray-domain-list-community ];
-  };
 
   postInstall = ''
     install -Dm444 install/dae.service $out/lib/systemd/system/dae.service
