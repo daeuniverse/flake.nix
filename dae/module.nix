@@ -21,6 +21,12 @@ in
         '';
       };
 
+      assets = mkOption {
+        description = mdDoc "assets required to run dae.";
+        type = with types;(listOf path);
+        default = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+      };
+
       tproxyPort = mkOption {
         description = mdDoc ''
           tproxy port, need to be specified if firewall running.
@@ -50,11 +56,14 @@ in
 
       geoDatabasePath = mkOption {
         type = types.path;
+        description = mdDoc ''
+          The path contains geolocation database.
+        '';
         default =
           let
-            assetsDrv = with pkgs;symlinkJoin {
+            assetsDrv = pkgs.symlinkJoin {
               name = "dae-assets";
-              paths = [ v2ray-geoip v2ray-domain-list-community ];
+              paths = cfg.assets;
             };
           in
           "${assetsDrv}/share/v2ray";
