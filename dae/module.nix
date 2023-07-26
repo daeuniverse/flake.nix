@@ -37,7 +37,7 @@ in
     systemd.services.dae = {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        ExecStartPre = [ "${lib.getExe cfg.package} validate -c ${cfg.configFilePath}" ]
+        ExecStartPre = [ "" "${lib.getExe cfg.package} validate -c ${cfg.configFilePath}" ]
           ++ (with lib; optional cfg.disableTxChecksumIpGeneric (getExe pkgs.writeShellApplication {
           name = "nicComp";
           text = with pkgs; ''
@@ -45,7 +45,7 @@ in
             ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
           '';
         }));
-        ExecStart = "${lib.getExe cfg.package} run --disable-timestamp -c ${cfg.configFilePath}";
+        ExecStart = [ "" "${lib.getExe cfg.package} run --disable-timestamp -c ${cfg.configFilePath}" ];
         Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
       };
     };
