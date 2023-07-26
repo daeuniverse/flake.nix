@@ -45,6 +45,7 @@ in
             ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
           '';
         }));
+        ExecStart = "${lib.getExe cfg.package} run --disable-timestamp -c ${cfg.configFilePath}";
         Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
       };
     };
