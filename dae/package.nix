@@ -1,12 +1,12 @@
-{ clang
-, fetchFromGitHub
-, buildGoModule
-, lib
-}:
+version: { clang
+         , fetchFromGitHub
+         , buildGoModule
+         , lib
+         }:
 buildGoModule (
   let hashes = lib.strings.splitString "\n" (builtins.readFile ./HASH); in rec {
     pname = "dae";
-    version = "0.2.2";
+    inherit version;
 
     src = fetchFromGitHub {
       owner = "daeuniverse";
