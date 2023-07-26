@@ -21,10 +21,9 @@ in
         type = lib.types.path;
         default =
           let
-            assetsDrv = lib.symlinkJoin {
+            assetsDrv = with pkgs;symlinkJoin {
               name = "dae-assets";
-              paths = with pkgs;
-                [ v2ray-geoip v2ray-domain-list-community ];
+              paths = [ v2ray-geoip v2ray-domain-list-community ];
             };
           in
           "${assetsDrv}/share/v2ray";
