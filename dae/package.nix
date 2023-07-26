@@ -47,8 +47,6 @@ buildGoModule rec {
 
   postInstall = ''
     install -Dm444 install/dae.service $out/lib/systemd/system/dae.service
-    wrapProgram $out/bin/dae \
-      --suffix DAE_LOCATION_ASSET : $assetsDrv/share/v2ray
     substituteInPlace $out/lib/systemd/system/dae.service \
       --replace /usr/bin/dae $out/bin/dae
   '';

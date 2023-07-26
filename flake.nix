@@ -16,11 +16,14 @@
       ];
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        packages.default = pkgs.callPackage ./dae/package.nix { };
+        packages = rec {
+          default = dae;
+          dae = pkgs.callPackage ./dae/package.nix { };
+        };
       };
       flake = {
-        nixosModules = { };
-        overlays = { };
+        nixosModules = { dae = import ./dae/module.nix { }; };
+        overlays = { dae = final: prev: { dae = inputs.self.packages.dae; }; };
       };
     };
 }
