@@ -21,18 +21,35 @@ in
         '';
       };
 
-      configFilePath = lib.mkOption {
-        type = lib.types.path;
+      tproxyPort = mkOption {
+        description = mdDoc ''
+          tproxy port, need to be specified if firewall running.
+          need to be consist with field `tproxy_port` in config file.
+        '';
+        type = with types; submodule {
+          options = {
+            enable = mkEnableOption "enable";
+            port = mkOption {
+              type = types.int;
+              default = 12345;
+            };
+          };
+
+        };
+      };
+
+      configFilePath = mkOption {
+        type = types.path;
         default = "/etc/dae/config.dae";
         description = mdDoc ''
           The path of dae config file, end with `.dae`.
         '';
       };
 
-      disableTxChecksumIpGeneric = lib.mkEnableOption (lib.mkDoc "See https://github.com/daeuniverse/dae/issues/43");
+      disableTxChecksumIpGeneric = mkEnableOption (mkDoc "See https://github.com/daeuniverse/dae/issues/43");
 
-      geoDatabasePath = lib.mkOption {
-        type = lib.types.path;
+      geoDatabasePath = mkOption {
+        type = types.path;
         default =
           let
             assetsDrv = with pkgs;symlinkJoin {
@@ -47,6 +64,11 @@ in
 
   config = lib.mkIf cfg.enable {
     systemd.packages = [ cfg.package ];
+    networking = lib.mkIf cfg.tproxyPort.enable {
+      firewall =
+        builtins.listToAttrs
+          (map (k: { name = "allowed${k}Ports"; value = [ cfg.tproxyPort.port ]; }) [ "UDP" "TCP" ]);
+    };
 
     systemd.services.dae = {
       wantedBy = [ "multi-user.target" ];
