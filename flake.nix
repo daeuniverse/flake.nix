@@ -7,23 +7,36 @@
       url = "github:Ninlives/pnpm2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ flake-parts, ... }:
+  outputs = inputs@{ flake-parts, pre-commit-hooks, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
       ];
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        packages = rec {
-          default = dae;
+        packages = {
           dae = pkgs.callPackage ./dae/package.nix { };
         };
+
+        checks = {
+          pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+            src = inputs.nixpkgs.lib.cleanSource ./.;
+            hooks = { nixpkgs-fmt.enable = true; };
+          };
+        };
+
       };
       flake = {
         nixosModules = { dae = import ./dae/module.nix { }; };
-        overlays = { dae = final: prev: { dae = inputs.self.packages.dae; }; };
+        overlays = rec {
+          default = dae;
+          dae = final: prev: { dae = inputs.self.packages.dae; };
+        };
       };
     };
 }
