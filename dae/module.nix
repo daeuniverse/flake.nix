@@ -63,6 +63,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [ cfg.package ];
     systemd.packages = [ cfg.package ];
     networking = lib.mkIf cfg.tproxyPort.enable {
       firewall =
