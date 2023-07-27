@@ -3,6 +3,11 @@ inputs: { config, lib, pkgs, ... }:
 let
   cfg = config.services.dae;
   defaultDaePackage = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dae;
+  defaultAssets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+  genAssetsDrv = paths: pkgs.symlinkJoin {
+    name = "dae-assets";
+    inherit paths;
+  };
 in
 {
   options = {
@@ -23,9 +28,26 @@ in
       };
 
       assets = mkOption {
-        description = mdDoc "assets required to run dae.";
+        description = mdDoc ''
+          Assets required to run dae.
+        '';
         type = with types;(listOf path);
-        default = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+        default = defaultAssets;
+      };
+
+      assetsPath = mkOption {
+        type = types.str;
+        default = "${genAssetsDrv cfg.assets}/share/v2ray";
+        example = ''
+          "${pkgs.symlinkJoin {
+            name = "assets";
+            paths = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+          }}/share/v2ray"
+        '';
+        description = mdDoc ''
+          The path which contains geolocation database.
+          This option will override `assets`.
+        '';
       };
 
       openFirewall = mkOption {
@@ -43,7 +65,7 @@ in
         };
       };
 
-      configFilePath = mkOption {
+      configFile = mkOption {
         type = types.path;
         default = "/etc/dae/config.dae";
         description = mdDoc ''
@@ -53,20 +75,6 @@ in
 
       disableTxChecksumIpGeneric = mkEnableOption (mkDoc "See https://github.com/daeuniverse/dae/issues/43");
 
-      geoDatabasePath = mkOption {
-        type = types.path;
-        description = mdDoc ''
-          The path which contains geolocation database.
-        '';
-        default =
-          let
-            assetsDrv = pkgs.symlinkJoin {
-              name = "dae-assets";
-              paths = cfg.assets;
-            };
-          in
-          "${assetsDrv}/share/v2ray";
-      };
     };
   };
 
@@ -93,12 +101,19 @@ in
       {
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
-          ExecStartPre = [ "" "${daeBin} validate -c ${cfg.configFilePath}" ]
+          ExecStartPre = [ "" "${daeBin} validate -c ${cfg.configFile}" ]
             ++ (with lib; optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
-          ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${cfg.configFilePath}" ];
-          Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
+          ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${cfg.configFile}" ];
+          Environment = "DAE_LOCATION_ASSET=${cfg.assetsPath}";
         };
       };
-  };
 
+    assertions = [{
+      assertion = lib.pathExists (toString (genAssetsDrv cfg.assets) + "/share/v2ray");
+      message = ''
+        Packages in `assets` has no preset paths included.
+        Please set `assetsPath` instead.
+      '';
+    }];
+  };
 }
