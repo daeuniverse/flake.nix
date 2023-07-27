@@ -78,21 +78,26 @@ in
           (map (k: { name = "allowed${k}Ports"; value = [ cfg.openFirewall.port ]; }) [ "UDP" "TCP" ]);
     };
 
-    systemd.services.dae = {
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStartPre = [ "" "dae validate -c ${cfg.configFilePath}" ]
-          ++ (with lib; optional cfg.disableTxChecksumIpGeneric (getExe pkgs.writeShellApplication {
-          name = "nicComp";
+    systemd.services.dae =
+      let
+        daeBin = lib.getExe cfg.package;
+        TxChecksumIpGenericWorkaround = with lib;(getExe pkgs.writeShellApplication {
+          name = "disable-tx-checksum-ip-generic";
           text = with pkgs; ''
             iface=$(${iproute2}/bin/ip route | ${lib.getExe gawk} '/default/ {print $5}')
             ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
           '';
-        }));
-        ExecStart = [ "" "dae run --disable-timestamp -c ${cfg.configFilePath}" ];
-        Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
+        });
+      in
+      {
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          ExecStartPre = [ "" "${daeBin} validate -c ${cfg.configFilePath}" ]
+            ++ (with lib; optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
+          ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${cfg.configFilePath}" ];
+          Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
+        };
       };
-    };
   };
 
 }
