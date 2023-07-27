@@ -7,7 +7,8 @@ in
 {
   options = {
     services.dae = with lib;{
-      enable = mkEnableOption (mkDoc "A Linux high-performance transparent proxy solution based on eBPF");
+      enable = mkEnableOption
+        (mkDoc "A Linux high-performance transparent proxy solution based on eBPF");
 
       package = mkOption {
         type = types.path;
@@ -29,7 +30,7 @@ in
 
       openFirewall = mkOption {
         description = mdDoc ''
-          need to be consist with field `tproxy_port` in config file.
+          Port to be opened. Consist with field `tproxy_port` in config file.
         '';
         type = with types; submodule {
           options = {
@@ -55,7 +56,7 @@ in
       geoDatabasePath = mkOption {
         type = types.path;
         description = mdDoc ''
-          The path contains geolocation database.
+          The path which contains geolocation database.
         '';
         default =
           let
