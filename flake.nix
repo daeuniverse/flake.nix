@@ -1,5 +1,5 @@
 {
-  description = "Nix flake for dae and daed ";
+  description = "Nix flake for dae and daed";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

@@ -27,9 +27,8 @@ in
         default = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
       };
 
-      tproxyPort = mkOption {
+      openFirewall = mkOption {
         description = mdDoc ''
-          tproxy port, need to be specified if firewall running.
           need to be consist with field `tproxy_port` in config file.
         '';
         type = with types; submodule {
@@ -40,7 +39,6 @@ in
               default = 12345;
             };
           };
-
         };
       };
 
@@ -74,16 +72,16 @@ in
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [ cfg.package ];
     systemd.packages = [ cfg.package ];
-    networking = lib.mkIf cfg.tproxyPort.enable {
+    networking = lib.mkIf cfg.openFirewall.enable {
       firewall =
         builtins.listToAttrs
-          (map (k: { name = "allowed${k}Ports"; value = [ cfg.tproxyPort.port ]; }) [ "UDP" "TCP" ]);
+          (map (k: { name = "allowed${k}Ports"; value = [ cfg.openFirewall.port ]; }) [ "UDP" "TCP" ]);
     };
 
     systemd.services.dae = {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        ExecStartPre = [ "" "${lib.getExe cfg.package} validate -c ${cfg.configFilePath}" ]
+        ExecStartPre = [ "" "dae validate -c ${cfg.configFilePath}" ]
           ++ (with lib; optional cfg.disableTxChecksumIpGeneric (getExe pkgs.writeShellApplication {
           name = "nicComp";
           text = with pkgs; ''
@@ -91,7 +89,7 @@ in
             ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
           '';
         }));
-        ExecStart = [ "" "${lib.getExe cfg.package} run --disable-timestamp -c ${cfg.configFilePath}" ];
+        ExecStart = [ "" "dae run --disable-timestamp -c ${cfg.configFilePath}" ];
         Environment = "DAE_LOCATION_ASSET=${cfg.geoDatabasePath}";
       };
     };
