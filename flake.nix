@@ -19,14 +19,9 @@
       ];
       systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        packages =
-          let
-            version = pkgs.lib.substring 0 8 self.lastModifiedDate
-              or self.lastModified or "19700101";
-          in
-          {
-            dae = pkgs.callPackage (import ./dae/package.nix version) { };
-          };
+        packages = {
+          dae = pkgs.callPackage ./dae/package.nix { };
+        };
 
         checks = {
           pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {

@@ -1,22 +1,22 @@
-version: { clang
-         , fetchFromGitHub
-         , buildGoModule
-         , lib
-         }:
+{ clang
+, fetchFromGitHub
+, buildGoModule
+, lib
+}:
 buildGoModule (
-  let hashes = lib.strings.splitString "\n" (builtins.readFile ./HASH); in rec {
+  let dyn = lib.strings.splitString "\n" (builtins.readFile ./dynamic_info); in rec {
     pname = "dae";
-    inherit version;
+    version = with lib; substring 0 8 (elemAt dyn 0);
 
     src = fetchFromGitHub {
       owner = "daeuniverse";
       repo = pname;
-      rev = "v${version}";
-      hash = lib.elemAt hashes 0;
+      rev = lib.elemAt dyn 0;
+      hash = lib.elemAt dyn 1;
       fetchSubmodules = true;
     };
 
-    vendorHash = lib.elemAt hashes 1;
+    vendorHash = lib.elemAt dyn 2;
 
     proxyVendor = true;
 
