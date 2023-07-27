@@ -1,6 +1,6 @@
 # flake.nix
 
-![CI state](https://github.com/daeuniverse/flake.nix/actions/workflows/eval.yaml/badge.svg)
+![CI state](https://github.com/daeuniverse/flake.nix/actions/workflows/lint.yaml/badge.svg)
 
 ## build with nix
 

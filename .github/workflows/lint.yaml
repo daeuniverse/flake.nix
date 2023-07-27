@@ -1,4 +1,4 @@
-name: eval
+name: Evaluate Flake
 on: 
   pull_request:
     branches: ["*"]
