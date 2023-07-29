@@ -1,0 +1,31 @@
+name: Update packages
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  update-dae:
+    name: update dae lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v22
+
+      - name: update dae source input
+        run: |
+          git config --global user.name "actions"
+          git config --global user.email "action@github.com"
+          nix flake lock --update-input dae-src --commit-lock-file
+          nix build .#packages.x86_64-linux.dae
+        shell: bash
+
+      - name: push lock update
+        run: |
+          git push
+        shell: bash
