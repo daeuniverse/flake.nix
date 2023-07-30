@@ -3,11 +3,11 @@
     "dae-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1690546324,
-        "narHash": "sha256-WNLWjjmGjB3//jfTegeJzJyS83JGqhuafo7uSKMUb3k=",
+        "lastModified": 1690645300,
+        "narHash": "sha256-BNrk/6aElirnJaAJlRqsD+oe7yqEw9AcKArU7FY0aZA=",
         "ref": "refs/heads/main",
-        "rev": "afae72e4b94a9b4267c60494b156ed0465084e14",
-        "revCount": 576,
+        "rev": "e4a95aade06883d075e236ccae0f74a11f7cbd48",
+        "revCount": 577,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/daeuniverse/dae"
