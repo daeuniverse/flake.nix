@@ -1,15 +1,20 @@
-src: { clang
-     , fetchFromGitHub
-     , buildGoModule
-     , lib
-     }:
+{ clang
+, fetchFromGitHub
+, buildGoModule
+}:
 buildGoModule rec {
   pname = "dae";
-  version = src.shortRev;
+  version = "unstable-2023-08-14";
 
-  inherit src;
+  src = fetchFromGitHub {
+    owner = "daeuniverse";
+    repo = pname;
+    rev = "8bbfd691a7034b6007600ed65547cb84f446d387";
+    sha256 = "sha256-WiJqhXYehuUCLEuVbsQkmTntuH1srtePtZgYBSTbxiw=";
+    fetchSubmodules = true;
+  };
 
-  vendorHash = "sha256-iVhIpnnXGDop9meShktheb0tmI+ytFV5PF0PK9CHeTY=";
+  vendorHash = "sha256-fb4PEMhV8+5zaRJyl+nYi2BHcOUDUVAwxce2xaRt5JA=";
 
   proxyVendor = true;
 

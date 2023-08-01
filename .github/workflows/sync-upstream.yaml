@@ -1,0 +1,35 @@
+name: Synchronize Upstream
+on:
+  workflow_dispatch:
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v22
+
+      - name: Check if sync-upstream branch exists in remote
+        id: check_remote_branch
+        run: |
+          echo "stdout=$(git ls-remote --heads origin sync-upstream)" >> $GITHUB_OUTPUT
+
+      - name: update dae package
+        run: |
+          git config user.name "daebot"
+          git config user.email "daebot@v2raya.org"
+          git checkout -B sync-upstream
+
+          nix run nixpkgs#nix-update -- --commit --version=branch --flake dae
+          git commit -m "chore: sync upstream" --no-verify
+
+          if [[ "${{ steps.check_remote_branch.outputs.stdout }}" != '' ]]; then
+            git pull origin sync-upstream --rebase
+          fi
+          git push -u origin sync-upstream
+        shell: bash

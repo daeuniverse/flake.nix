@@ -11,10 +11,6 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    dae-src = {
-      url = "git+https://github.com/daeuniverse/dae?submodules=1";
-      flake = false;
-    };
   };
 
   outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, ... }:
@@ -24,7 +20,7 @@
       systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
         packages = {
-          dae = pkgs.callPackage (import ./dae/package.nix inputs.dae-src) { };
+          dae = pkgs.callPackage ./dae/package.nix { };
         };
 
         checks = {
