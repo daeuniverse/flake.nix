@@ -10,6 +10,9 @@ let
   };
 in
 {
+  # disables Nixpkgs dae module to avoid conflicts
+  disabledModules = [ "services/networking/dae.nix" ];
+
   options = {
     services.dae = with lib;{
       enable = mkEnableOption
@@ -79,8 +82,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # disables Nixpkgs dae module to avoid conflicts
-    disabledModules = [ "services/networking/dae.nix" ];
     environment.systemPackages = [ cfg.package ];
     systemd.packages = [ cfg.package ];
     networking = lib.mkIf cfg.openFirewall.enable {
