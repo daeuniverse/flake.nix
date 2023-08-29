@@ -72,9 +72,6 @@ buildGoModule rec {
     substituteInPlace Makefile \
       --replace /bin/bash "/bin/sh" \
 
-    # take over go build step
-    sed -i '73d' Makefile
-
     chmod -R 777 webrender
 
     go generate ./...
