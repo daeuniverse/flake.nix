@@ -40,8 +40,11 @@
       };
       flake = {
         nixosModules = { dae = import ./dae/module.nix inputs; };
-        overlays = rec {
-          default = dae;
+        overlays = {
+          default = final: prev: {
+            dae = inputs.self.packages.dae;
+            daed = inputs.self.packages.daed;
+          };
           dae = final: prev: { dae = inputs.self.packages.dae; };
           daed = final: prev: { daed = inputs.self.packages.daed; };
         };

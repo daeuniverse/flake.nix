@@ -77,8 +77,6 @@ buildGoModule rec {
 
     chmod -R 777 webrender
 
-    touch graphql/service/config/global/generated_resolver.go
-
     go generate ./...
 
     find webrender/web -type f -size +4k ! -name "*.gz" ! -name "*.woff" ! -name "*.woff2" -exec sh -c "
