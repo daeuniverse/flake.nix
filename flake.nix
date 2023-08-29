@@ -19,8 +19,16 @@
       ];
       systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = with inputs;[
+            pnpm2nix.overlays.default
+          ];
+        };
+
         packages = {
           dae = pkgs.callPackage ./dae/package.nix { };
+          daed = pkgs.callPackage ./daed/package.nix { };
         };
 
         checks = {
@@ -35,6 +43,7 @@
         overlays = rec {
           default = dae;
           dae = final: prev: { dae = inputs.self.packages.dae; };
+          daed = final: prev: { daed = inputs.self.packages.daed; };
         };
       };
     };
