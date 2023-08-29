@@ -64,7 +64,7 @@ buildGoModule rec {
   proxyVendor = true;
   preBuild = ''
     # replace built dae ebpf bindings
-    rm -r ./dae-core    
+    rm -r ./dae-core
     cp -r ${dae-ebpf} ./dae-core
 
     cp -r ${dist} ./webrender/web
