@@ -34,3 +34,8 @@ jobs:
         run: |
           nix build .#packages.x86_64-linux.dae
         shell: bash
+
+      - name: build daed
+        run: |
+          nix build .#packages.x86_64-linux.daed
+        shell: bash
