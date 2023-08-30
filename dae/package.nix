@@ -10,7 +10,7 @@ buildGoModule rec {
     owner = "daeuniverse";
     repo = pname;
     rev = "8bbfd691a7034b6007600ed65547cb84f446d387";
-    sha256 = "sha256-WiJqhXYehuUCLEuVbsQkmTntuH1srtePtZgYBSTbxiw=";
+    hash = "sha256-WiJqhXYehuUCLEuVbsQkmTntuH1srtePtZgYBSTbxiw=";
     fetchSubmodules = true;
   };
 
