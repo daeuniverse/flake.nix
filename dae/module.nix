@@ -76,47 +76,79 @@ in
         '';
       };
 
+      config = mkOption {
+        type = types.str;
+        default = ''
+          global{}
+          routing{}
+        '';
+        description = lib.mdDoc ''
+          Config text for dae.
+        '';
+      };
+
+
       disableTxChecksumIpGeneric = mkEnableOption (mkDoc "See https://github.com/daeuniverse/dae/issues/43");
 
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ cfg.package ];
-    systemd.packages = [ cfg.package ];
-    networking = lib.mkIf cfg.openFirewall.enable {
-      firewall =
-        builtins.listToAttrs
-          (map (k: { name = "allowed${k}Ports"; value = [ cfg.openFirewall.port ]; }) [ "UDP" "TCP" ]);
-    };
+  config = lib.mkIf cfg.enable
 
-    systemd.services.dae =
-      let
-        daeBin = lib.getExe cfg.package;
-        TxChecksumIpGenericWorkaround = with lib;(getExe pkgs.writeShellApplication {
-          name = "disable-tx-checksum-ip-generic";
-          text = with pkgs; ''
-            iface=$(${iproute2}/bin/ip route | ${lib.getExe gawk} '/default/ {print $5}')
-            ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
-          '';
-        });
-      in
-      {
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          ExecStartPre = [ "" "${daeBin} validate -c ${cfg.configFile}" ]
-            ++ (with lib; optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
-          ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${cfg.configFile}" ];
-          Environment = "DAE_LOCATION_ASSET=${cfg.assetsPath}";
-        };
+    {
+      environment.systemPackages = [ cfg.package ];
+      systemd.packages = [ cfg.package ];
+
+      environment.etc."dae/config.dae" = {
+        mode = "0400";
+        source = pkgs.writeText "config.dae" cfg.config;
       };
 
-    assertions = [{
-      assertion = lib.pathExists (toString (genAssetsDrv cfg.assets) + "/share/v2ray");
-      message = ''
-        Packages in `assets` has no preset paths included.
-        Please set `assetsPath` instead.
-      '';
-    }];
-  };
+      networking = lib.mkIf cfg.openFirewall.enable {
+        firewall =
+          builtins.listToAttrs
+            (map (k: { name = "allowed${k}Ports"; value = [ cfg.openFirewall.port ]; }) [ "UDP" "TCP" ]);
+      };
+
+      systemd.services.dae =
+        let
+          daeBin = lib.getExe cfg.package;
+          TxChecksumIpGenericWorkaround = with lib;(getExe pkgs.writeShellApplication {
+            name = "disable-tx-checksum-ip-generic";
+            text = with pkgs; ''
+              iface=$(${iproute2}/bin/ip route | ${lib.getExe gawk} '/default/ {print $5}')
+              ${lib.getExe ethtool} -K "$iface" tx-checksum-ip-generic off
+            '';
+          });
+        in
+        {
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig = {
+            ExecStartPre = [ "" "${daeBin} validate -c ${cfg.configFile}" ]
+              ++ (with lib; optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
+            ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${cfg.configFile}" ];
+            Environment = "DAE_LOCATION_ASSET=${cfg.assetsPath}";
+          };
+        };
+
+      assertions = [
+        {
+          assertion = lib.pathExists (toString (genAssetsDrv cfg.assets) + "/share/v2ray");
+          message = ''
+            Packages in `assets` has no preset paths included.
+            Please set `assetsPath` instead.
+          '';
+        }
+
+        {
+          assertion = !((config.services.dae.config != "global{}\nrouting{}\n")
+            && (config.services.dae.configFile != "/etc/dae/config.dae"));
+          message = ''
+            Option `config` and `configFile` could not be set
+            at the same time.
+          '';
+        }
+      ];
+    }
+  ;
 }
