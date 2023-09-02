@@ -3,7 +3,7 @@ inputs: { config, lib, pkgs, ... }:
 let
   cfg = config.services.dae;
   defaultDaePackage = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dae;
-  defaultAssets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+  assets = cfg.assets;
   genAssetsDrv = paths: pkgs.symlinkJoin {
     name = "dae-assets";
     inherit paths;
@@ -16,7 +16,7 @@ in
   options = {
     services.dae = with lib;{
       enable = mkEnableOption
-        (mkDoc "A Linux high-performance transparent proxy solution based on eBPF");
+        (mdDoc "A Linux high-performance transparent proxy solution based on eBPF");
 
       package = mkOption {
         type = types.path;
@@ -31,21 +31,22 @@ in
       };
 
       assets = mkOption {
+        type = with types;(listOf path);
+        default = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+        defaultText = literalExpression "with pkgs; [ v2ray-geoip v2ray-domain-list-community ]";
         description = mdDoc ''
           Assets required to run dae.
         '';
-        type = with types;(listOf path);
-        default = defaultAssets;
       };
 
       assetsPath = mkOption {
         type = types.str;
-        default = "${genAssetsDrv cfg.assets}/share/v2ray";
-        example = ''
-          "${pkgs.symlinkJoin {
-            name = "assets";
-            paths = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
-          }}/share/v2ray"
+        default = "${genAssetsDrv assets}/share/v2ray";
+        defaultText = literalExpression ''
+          (symlinkJoin {
+              name = "dae-assets";
+              paths = assets;
+          })/share/v2ray
         '';
         description = mdDoc ''
           The path which contains geolocation database.
@@ -54,23 +55,36 @@ in
       };
 
       openFirewall = mkOption {
-        description = mdDoc ''
-          Port to be opened. Consist with field `tproxy_port` in config file.
-        '';
         type = with types; submodule {
           options = {
             enable = mkEnableOption "enable";
             port = mkOption {
               type = types.int;
-              default = 12345;
+              description = ''
+                Port to be opened. Consist with field `tproxy_port` in config file.
+              '';
             };
           };
         };
+        default = {
+          enable = true;
+          port = 12345;
+        };
+        defaultText = literalExpression ''
+          {
+            enable = true;
+            port = 12345;
+          }
+        '';
+        description = mdDoc ''
+          Open the firewall port.
+        '';
       };
 
       configFile = mkOption {
         type = types.path;
         default = "/etc/dae/config.dae";
+        example = "/path/to/your/config.dae";
         description = mdDoc ''
           The path of dae config file, end with `.dae`.
         '';
@@ -82,13 +96,15 @@ in
           global{}
           routing{}
         '';
-        description = lib.mdDoc ''
+        description = mdDoc ''
           Config text for dae.
+
+          See <https://github.com/daeuniverse/dae/blob/main/example.dae>.
         '';
       };
 
-
-      disableTxChecksumIpGeneric = mkEnableOption (mkDoc "See https://github.com/daeuniverse/dae/issues/43");
+      disableTxChecksumIpGeneric =
+        mkEnableOption (mdDoc "See https://github.com/daeuniverse/dae/issues/43");
 
     };
   };
@@ -106,8 +122,12 @@ in
 
       networking = lib.mkIf cfg.openFirewall.enable {
         firewall =
-          builtins.listToAttrs
-            (map (k: { name = "allowed${k}Ports"; value = [ cfg.openFirewall.port ]; }) [ "UDP" "TCP" ]);
+          let portToOpen = cfg.openFirewall.port;
+          in
+          {
+            allowedTCPPorts = [ portToOpen ];
+            allowedUDPPorts = [ portToOpen ];
+          };
       };
 
       systemd.services.dae =
@@ -149,6 +169,5 @@ in
           '';
         }
       ];
-    }
-  ;
+    };
 }
