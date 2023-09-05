@@ -44,10 +44,13 @@ Modify flake.nix
     };
 }
 
-# use package
+# use packages
 
 #...
-environment.systemPackages = with inputs.daeuniverse.packages.x86_64-linux; [ dae daed ];
+environment.systemPackages =
+  with inputs.daeuniverse.packages.x86_64-linux;
+    [ dae daed ];
+
 ```
 
 ## License

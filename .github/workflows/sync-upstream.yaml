@@ -26,7 +26,6 @@ jobs:
           git checkout -B sync-upstream
 
           nix run nixpkgs#nix-update -- --commit --version=branch --flake dae
-          git commit -m "chore: sync upstream" --no-verify
 
           if [[ "${{ steps.check_remote_branch.outputs.stdout }}" != '' ]]; then
             git pull origin sync-upstream --rebase
