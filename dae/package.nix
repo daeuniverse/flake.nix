@@ -28,7 +28,7 @@ buildGoModule rec {
   ];
 
   preBuild = ''
-    make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector" \
+    make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
     NOSTRIP=y \
     ebpf
   '';
