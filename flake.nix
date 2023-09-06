@@ -40,14 +40,21 @@
       };
       flake =
         let
+          moduleName = [ "dae" "daed" ];
           genFlake = n: {
-            nixosModules = { ${n} = import ./${n}/module.nix inputs; };
+            nixosModules = {
+              ${n} = import ./${n}/module.nix inputs;
+            };
             overlays = {
-              default = final: prev: { ${n} = inputs.self.packages.${n}; };
               ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
             };
           };
         in
-        inputs.nixpkgs.lib.mkMerge (map genFlake [ "dae" "daed" ]);
+        inputs.nixpkgs.lib.mkMerge (
+          (map genFlake moduleName) ++ [{
+            overlays.default = final: prev: inputs.nixpkgs.lib.genAttrs moduleName
+              (n: { ${n} = inputs.self.packages.${n}; });
+          }]
+        );
     };
 }
