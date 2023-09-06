@@ -38,16 +38,16 @@
           };
         };
       };
-      flake = {
-        nixosModules = { dae = import ./dae/module.nix inputs; };
-        overlays = {
-          default = final: prev: {
-            dae = inputs.self.packages.dae;
-            daed = inputs.self.packages.daed;
+      flake =
+        let
+          genFlake = n: {
+            nixosModules = { ${n} = import ./${n}/module.nix inputs; };
+            overlays = {
+              default = final: prev: { ${n} = inputs.self.packages.${n}; };
+              ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
+            };
           };
-          dae = final: prev: { dae = inputs.self.packages.dae; };
-          daed = final: prev: { daed = inputs.self.packages.daed; };
-        };
-      };
+        in
+        inputs.nixpkgs.lib.mkMerge (map genFlake [ "dae" "daed" ]);
     };
 }
