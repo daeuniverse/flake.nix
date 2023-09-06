@@ -23,6 +23,7 @@ Modify flake.nix
     nixosConfigurations.HOSTNAME = nixpkgs.lib.nixosSystem {
       modules = [
         inputs.daeuniverse.nixosModules.dae
+        inputs.daeuniverse.nixosModules.daed
       ];
     };
   }
@@ -32,6 +33,20 @@ Modify flake.nix
 # configuration.nix
 
 {inputs, pkgs, ...}: {
+
+
+# with daed
+  services.daed = {
+      enable = true;
+      configDir = "/etc/daed";
+      listen = "0.0.0.0:2023";
+      openFirewall = {
+        enable = true;
+        port = 12345;
+      };
+  };
+
+# or with dae
   services.dae = {
       enable = true;
       disableTxChecksumIpGeneric = false;
@@ -41,8 +56,8 @@ Modify flake.nix
         enable = true;
         port = 12345;
       };
-    };
-}
+  };
+};
 
 # use packages
 
