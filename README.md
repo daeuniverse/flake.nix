@@ -8,9 +8,9 @@
 $ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
 ```
 
-## use with flake
+## Use with flake
 
-Modify flake.nix
+1. Import nixosModule.
 
 ```nix
 # flake.nix
@@ -28,27 +28,20 @@ Modify flake.nix
     };
   }
 }
+```
 
 
+2. Enable dae or daed module.
+
+```nix
 # configuration.nix
 
-{inputs, pkgs, ...}: {
+# to see full options, check dae{,d}/module.nix
 
-
-# with daed
-  services.daed = {
-      enable = true;
-      configDir = "/etc/daed";
-      listen = "0.0.0.0:2023";
-      openFirewall = {
-        enable = true;
-        port = 12345;
-      };
-  };
-
-# or with dae
+# with dae
   services.dae = {
       enable = true;
+      package = pkgs.dae;
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
@@ -57,11 +50,28 @@ Modify flake.nix
         port = 12345;
       };
   };
-};
+```
 
-# use packages
 
-#...
+```nix
+# with daed
+  services.daed = {
+      enable = true;
+      package = pkgs.daed;
+      configdir = "/etc/daed";
+      listen = "0.0.0.0:2023";
+      openfirewall = {
+        enable = true;
+        port = 12345;
+      };
+  };
+
+```
+
+## Directly use packages
+
+```nix
+
 environment.systemPackages =
   with inputs.daeuniverse.packages.x86_64-linux;
     [ dae daed ];
