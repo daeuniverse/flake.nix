@@ -52,6 +52,8 @@ Modify flake.nix
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
+      # alternatively, specify assets dir
+      # assetsPath = "/etc/dae";
       openFirewall = {
         enable = true;
         port = 12345;
