@@ -17,18 +17,18 @@ jobs:
       - name: Check if sync-upstream branch exists in remote
         id: check_remote_branch
         run: |
-          echo "stdout=$(git ls-remote --heads origin sync-upstream)" >> $GITHUB_OUTPUT
+          echo "stdout=$(git ls-remote --heads origin unstable)" >> $GITHUB_OUTPUT
 
       - name: update dae package
         run: |
           git config user.name "daebot"
           git config user.email "daebot@v2raya.org"
-          git checkout -B sync-upstream
+          git checkout -B unstable
 
           nix run nixpkgs#nix-update -- --commit --version=branch --flake dae
 
           if [[ "${{ steps.check_remote_branch.outputs.stdout }}" != '' ]]; then
-            git pull origin sync-upstream --rebase
+            git pull origin unstable --rebase
           fi
-          git push -u origin sync-upstream
+          git push -u origin unstable
         shell: bash
