@@ -33,15 +33,18 @@ $ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
 
 2. Enable dae or daed module.
 
+> To see full options, check `dae{,d}/module.nix`.
+
 ```nix
 # configuration.nix
 
-# to see full options, check dae{,d}/module.nix
+{
+  # ...
 
-# with dae
+  # with dae as a systemd service
   services.dae = {
       enable = true;
-      package = pkgs.dae;
+      # package = inputs.daeuniverse.packages.x86_64-linux.daed; # default
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
@@ -52,32 +55,40 @@ $ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
         port = 12345;
       };
   };
+}
 ```
 
 
 ```nix
-# with daed
+# configuration.nix
+
+{
+  # ...
+
+  # daed - dae with a web dashboard
   services.daed = {
       enable = true;
-      package = pkgs.daed;
-      configdir = "/etc/daed";
+      # package = inputs.daeuniverse.packages.x86_64-linux.daed; # default
+      configDir = "/etc/daed";
       listen = "0.0.0.0:2023";
-      openfirewall = {
+      openFirewall = {
         enable = true;
         port = 12345;
       };
   };
-
+}
 ```
 
 ## Directly use packages
 
 ```nix
+# configuration.nix
 
-environment.systemPackages =
-  with inputs.daeuniverse.packages.x86_64-linux;
+{
+  environment.systemPackages =
+    with inputs.daeuniverse.packages.x86_64-linux;
     [ dae daed ];
-
+}
 ```
 
 ## Nightly build
