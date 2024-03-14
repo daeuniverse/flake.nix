@@ -14,7 +14,7 @@
   };
 
   outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       imports = [
       ];
       systems = [ "x86_64-linux" "aarch64-linux" ];
@@ -40,10 +40,18 @@
       };
       flake =
         let
-          moduleName = [ "dae" "daed" ];
+          moduleName = [
+            "dae"
+            "daed"
+          ];
           genFlake = n: {
             nixosModules = {
-              ${n} = import ./${n}/module.nix inputs;
+              ${n} = { pkgs, ... }: {
+                imports = [ ./${n}/module.nix ];
+                services.dae.package = withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
+                  config.packages.${n}
+                );
+              };
             };
             overlays = {
               ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
@@ -56,5 +64,5 @@
               (n: { ${n} = inputs.self.packages.${n}; });
           }]
         );
-    };
+    });
 }
