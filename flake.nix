@@ -16,6 +16,7 @@
   outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       imports = [
+        pre-commit-hooks.flakeModule
       ];
       systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
@@ -30,11 +31,10 @@
           dae = pkgs.callPackage ./dae/package.nix { };
           daed = pkgs.callPackage ./daed/package.nix { };
         };
-
-        checks = {
-          pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-            src = inputs.nixpkgs.lib.cleanSource ./.;
-            hooks = { nixpkgs-fmt.enable = true; };
+        pre-commit = {
+          check.enable = true;
+          settings.hooks = {
+            nixpkgs-fmt.enable = true;
           };
         };
       };
@@ -48,9 +48,10 @@
             nixosModules = {
               ${n} = { pkgs, ... }: {
                 imports = [ ./${n}/module.nix ];
-                services.dae.package = withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
-                  config.packages.${n}
-                );
+                services.dae.package =
+                  withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
+                    config.packages.${n}
+                  );
               };
             };
             overlays = {
