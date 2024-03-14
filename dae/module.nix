@@ -1,9 +1,8 @@
-inputs: { config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.services.dae;
   assets = cfg.assets;
-  defaultDaePackage = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dae;
   genAssetsDrv = paths: pkgs.symlinkJoin {
     name = "dae-assets";
     inherit paths;
@@ -19,14 +18,7 @@ in
         "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
       package = mkOption {
-        type = types.path;
-        default = defaultDaePackage;
-        defaultText = literalExpression ''
-          dae.packages.${pkgs.stdenv.hostPlatform.system}.dae
-        '';
-        example = literalExpression "pkgs.dae";
-        description = "The dae package to use.";
-
+        defaultText = lib.literalMD "`packages.dae` from this flake";
       };
 
       assets = mkOption {
@@ -167,8 +159,7 @@ in
             assertion = !((config.services.dae.config != null)
               && (config.services.dae.configFile != null));
             message = ''
-              Option `config` and `configFile` could not be set
-              at the same time.
+              Option `config` and `configFile` could not be set at the same time.
             '';
           }
 
