@@ -1,8 +1,7 @@
-inputs: { config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 let
   cfg = config.services.daed;
-  defaultDaedPackage = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.daed;
 in
 {
   # disables Nixpkgs daed module to avoid conflicts
@@ -10,35 +9,22 @@ in
 
   options = {
     services.daed = with lib;{
-      enable = mkEnableOption
-        (mdDoc "A modern dashboard for dae");
+      enable = mkEnableOption "A modern dashboard for dae";
 
       package = mkOption {
-        type = types.path;
-        default = defaultDaedPackage;
-        defaultText = literalExpression ''
-          daed.packages.${pkgs.stdenv.hostPlatform.system}.daed
-        '';
-        example = literalExpression "pkgs.daed";
-        description = mdDoc ''
-          The daed package to use.
-        '';
+        defaultText = lib.literalMD "`packages.daed` from this flake";
       };
 
       configDir = mkOption {
         type = types.str;
         default = "/etc/daed";
-        description = mdDoc ''
-          The daed work directory.
-        '';
+        description = "The daed work directory.";
       };
 
       listen = mkOption {
         type = types.str;
         default = "0.0.0.0:2023";
-        description = mdDoc ''
-          The daed listen address.
-        '';
+        description = "The daed listen address.";
       };
 
       openFirewall = mkOption {
@@ -63,9 +49,7 @@ in
             port = 12345;
           }
         '';
-        description = mdDoc ''
-          Open the firewall port.
-        '';
+        description = "Open the firewall port.";
       };
     };
   };
