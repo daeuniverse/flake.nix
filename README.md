@@ -48,7 +48,7 @@ $ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
-      # alternatively, specify assets dir
+      # alternatively, specify a dir which contains geo database.
       # assetsPath = "/etc/dae";
       openFirewall = {
         enable = true;
