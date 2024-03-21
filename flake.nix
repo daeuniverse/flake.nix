@@ -47,6 +47,7 @@
             pkgs.nushell
           ];
         };
+        formatter = pkgs.nixpkgs-fmt;
       };
       flake =
         let
