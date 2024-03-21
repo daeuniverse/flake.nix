@@ -11,12 +11,15 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-eval-jobs = { url = "github:nix-community/nix-eval-jobs"; };
+    devshell.url = "github:numtide/devshell";
   };
 
-  outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, ... }:
+  outputs = inputs@{ self, flake-parts, pre-commit-hooks, nixpkgs, devshell, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       imports = [
         pre-commit-hooks.flakeModule
+        devshell.flakeModule
       ];
       systems = [ "x86_64-linux" "aarch64-linux" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
@@ -37,6 +40,14 @@
             nixpkgs-fmt.enable = true;
           };
         };
+        devshells.default.devshell = {
+          packages = [
+            inputs.nix-eval-jobs.outputs.packages.${system}.default
+            pkgs.cachix
+            pkgs.nushell
+          ];
+        };
+        formatter = pkgs.nixpkgs-fmt;
       };
       flake =
         let
