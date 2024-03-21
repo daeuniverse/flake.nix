@@ -117,7 +117,11 @@ Adopt nightly flake
 }
 ```
 
-## Cache
+## Binary cache
+
+If you like to fetch derivations from our cache where the build artefacts are pushed, it is available in [daeuniverse.cachix.org](https://app.cachix.org/cache/daeuniverse#pull).
+
+To enable it in flake:
 
 ```nix
 nix.settings = {
@@ -126,7 +130,6 @@ nix.settings = {
     "daeuniverse.cachix.org-1:8hRIzkQmAKxeuYY3c/W1I7QbZimYphiPX/E7epYNTeM="
   ];
 };
-```
 
 ## License
 
