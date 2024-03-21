@@ -41,7 +41,11 @@
           };
         };
         devshells.default.devshell = {
-          packages = [ inputs.nix-eval-jobs.outputs.packages.${system}.default pkgs.cachix ];
+          packages = [
+            inputs.nix-eval-jobs.outputs.packages.${system}.default
+            pkgs.cachix
+            pkgs.nushell
+          ];
         };
       };
       flake =

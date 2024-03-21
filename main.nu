@@ -49,9 +49,13 @@ def buildDrv [ drvRef: string ] {
   })
   print -e $pushPaths
 
-  let cachePathsStr = ($pushPaths | each {|it| $"($it)(char nl)"} | str join)
+  if ('CACHIX_AUTH_TOKEN' in $env) {
+    let cachePathsStr = ($pushPaths | each {|it| $"($it)(char nl)"} | str join)
+    let cacheResults = (echo $cachePathsStr | ^cachix push daeuniverse | complete)
+    header "purple_reverse" $"cache/push ($drvRef)"
+    print -e $cacheResults
+  } else {
+    print -e "'$CACHIX_AUTH_TOKEN' not set, not pushing to cachix."
+  }
 
-  let cacheResults = (echo $cachePathsStr | ^cachix push daeuniverse | complete)
-  header "purple_reverse" $"cache/push ($drvRef)"
-  print -e $cacheResults
 }
