@@ -2,12 +2,6 @@
 
 ![CI state](https://github.com/daeuniverse/flake.nix/actions/workflows/lint.yaml/badge.svg)
 
-## build with nix
-
-```nix
-$ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
-```
-
 ## Use with flake
 
 1. Import nixosModule.
@@ -36,58 +30,65 @@ $ nix build github:daeuniverse/flake.nix#packages.x86_64-linux.dae
 > To see full options, check `dae{,d}/module.nix`.
 
 ```nix
-# configuration.nix
-
+# nixos configuration module
 {
   # ...
 
-  # with dae as a systemd service
   services.dae = {
       enable = true;
-      # package = inputs.daeuniverse.packages.x86_64-linux.daed; # default
+
+      openFirewall = {
+        enable = true;
+        port = 12345;
+      };
+
+      /* default options
+
+      package = inputs.daeuniverse.packages.x86_64-linux.daed;
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
-      # alternatively, specify a dir which contains geo database.
+
+      */
+
+      # alternative of `assets`, a dir contains geo database.
       # assetsPath = "/etc/dae";
-      openFirewall = {
-        enable = true;
-        port = 12345;
-      };
   };
 }
 ```
 
 
 ```nix
-# configuration.nix
-
+# nixos configuration module
 {
-  # ...
-
   # daed - dae with a web dashboard
   services.daed = {
       enable = true;
-      # package = inputs.daeuniverse.packages.x86_64-linux.daed; # default
-      configDir = "/etc/daed";
-      listen = "0.0.0.0:2023";
+
       openFirewall = {
         enable = true;
         port = 12345;
       };
+
+      /* default options
+
+      package = inputs.daeuniverse.packages.x86_64-linux.daed;
+      configDir = "/etc/daed";
+      listen = "127.0.0.1:2023";
+
+      */
   };
 }
 ```
 
-## Directly use packages
+## Globally install packages
 
 ```nix
-# configuration.nix
-
+# nixos configuration module
 {
   environment.systemPackages =
     with inputs.daeuniverse.packages.x86_64-linux;
-    [ dae daed ];
+      [ dae daed ];
 }
 ```
 
@@ -105,15 +106,6 @@ Adopt nightly flake
 {
   inputs.daeuniverse.url = "github:daeuniverse/flake.nix/unstable";
   # ...
-
-  outputs = {nixpkgs, ...} @inputs: {
-    nixosConfigurations.HOSTNAME = nixpkgs.lib.nixosSystem {
-      modules = [
-        inputs.daeuniverse.nixosModules.dae
-        inputs.daeuniverse.nixosModules.daed
-      ];
-    };
-  }
 }
 ```
 
