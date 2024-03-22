@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   cfg = config.services.daed;
@@ -23,8 +23,24 @@ in
 
       listen = mkOption {
         type = types.str;
-        default = "0.0.0.0:2023";
+        default = "127.0.0.1:2023";
         description = "The daed listen address.";
+      };
+
+      assetsPaths = mkOption {
+        type = with types; listOf str;
+        default = [
+          "${pkgs.v2ray-geoip}/share/v2ray/geoip.dat"
+          "${pkgs.v2ray-domain-list-community}/share/v2ray/geosite.dat"
+        ];
+        description = ''
+          Geo database required to run daed.
+          Notice that this defines different from `assetsPath` in dae module.
+          This will be linked into `configDir`.
+        '';
+        example = ''
+          ["/var/lib/dae/geoip.dat" "/home/who/geosite.dat"]
+        '';
       };
 
       openFirewall = mkOption {
@@ -84,6 +100,13 @@ in
             "network-online.target"
           ];
 
+          preStart = ''
+            umask 0077
+            mkdir -p ${cfg.configDir}
+            ${lib.foldl' (acc: elem: acc + elem + "\n") "" 
+                (map (n: "ln -sfn ${n} ${cfg.configDir}")
+                  cfg.assetsPaths)}
+          '';
           serviceConfig = {
             Type = "simple";
             User = "root";

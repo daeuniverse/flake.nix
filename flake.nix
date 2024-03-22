@@ -59,7 +59,7 @@
             nixosModules = {
               ${n} = { pkgs, ... }: {
                 imports = [ ./${n}/module.nix ];
-                services.dae.package =
+                services.${n}.package =
                   withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
                     config.packages.${n}
                   );
