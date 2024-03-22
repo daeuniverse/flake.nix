@@ -130,6 +130,7 @@ nix.settings = {
     "daeuniverse.cachix.org-1:8hRIzkQmAKxeuYY3c/W1I7QbZimYphiPX/E7epYNTeM="
   ];
 };
+```
 
 ## License
 
