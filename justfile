@@ -32,7 +32,7 @@ prefetch-url url:
 
 # nix-prefetch-git
 prefetch-git repo rev:
-  @nix-prefetch-git --url 'git@github.com:{{ repo }}' --rev '{{ rev }}' --fetch-submodules
+  @nix-prefetch-git --url 'git@github.com:{{ repo }}' --rev '{{ rev }}' --fetch-submodules --quiet
 
 # stage all files
 add:
