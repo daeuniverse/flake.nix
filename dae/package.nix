@@ -3,19 +3,19 @@
 , fetchFromGitHub
 , buildGoModule
 }:
+let
+  metadata = builtins.fromJSON (builtins.readFile ./metadata.json);
+in
 buildGoModule rec {
   pname = "dae";
-  version = "unstable-2024-03-01.r667.49f576e";
+  inherit (metadata) version vendorHash;
 
   src = fetchFromGitHub {
     owner = "daeuniverse";
     repo = pname;
-    rev = "49f576e37d2178c9631bd44415c5618a8b38b1a3";
-    hash = "sha256-ESYWcsP1Px1ki3H0GIjbmYk4mYblFlid+EgdHa/1BeI=";
+    inherit (metadata) rev hash;
     fetchSubmodules = true;
   };
-
-  vendorHash = "sha256-/r118MbfHxXHt7sKN8DOGj+SmBqSZ+ttjYywnqOIPuY=";
 
   proxyVendor = true;
 
