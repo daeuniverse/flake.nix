@@ -10,6 +10,14 @@ set positional-arguments := true
 default:
   @just --list
 
+# update all flake inputs
+up:
+  @nix flake update
+
+# update a particular flake input
+upp input:
+  @nix flake lock --update-input {{ input }}
+
 # build pkg
 build pkg:
   @nix build .#{{ pkg }}
@@ -17,14 +25,6 @@ build pkg:
 # check version
 version pkg:
   @./result/bin/{{ pkg }} --version
-
-# update all flake inputs
-update:
-  @nix flake update
-
-# update a particular flake input
-update-input input:
-  @nix flake lock --update-input {{ input }}
 
 # nix-prefetch-url
 prefetch-url url:
