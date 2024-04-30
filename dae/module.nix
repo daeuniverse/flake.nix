@@ -12,6 +12,7 @@ let
     literalExpression
     types
     optional
+    getExe
     ;
 
   cfg = config.services.dae;
@@ -137,13 +138,13 @@ in
 
         systemd.services.dae =
           let
-            daeBin = lib.getExe cfg.package;
+            daeBin = getExe cfg.package;
 
-            TxChecksumIpGenericWorkaround = lib.getExe pkgs.writeShellApplication {
+            TxChecksumIpGenericWorkaround = getExe pkgs.writeShellApplication {
               name = "disable-tx-checksum-ip-generic";
               text = ''
-                iface=$(${pkgs.iproute2}/bin/ip route | ${lib.getExe pkgs.gawk} '/default/ {print $5}')
-                ${lib.getExe pkgs.ethtool} -K "$iface" tx-checksum-ip-generic off
+                iface=$(${pkgs.iproute2}/bin/ip route | ${getExe pkgs.gawk} '/default/ {print $5}')
+                ${getExe pkgs.ethtool} -K "$iface" tx-checksum-ip-generic off
               '';
             };
 
@@ -175,16 +176,14 @@ in
           }
 
           {
-            assertion = !((config.services.dae.config != null) && (config.services.dae.configFile != null));
+            assertion =
+              let
+                A = config.services.dae.config == null;
+                B = config.services.dae.configFile == null;
+              in
+              (A && !B) || (!A && B); # xor
             message = ''
-              Option `config` and `configFile` could not be set at the same time.
-            '';
-          }
-
-          {
-            assertion = !((config.services.dae.config == null) && (config.services.dae.configFile == null));
-            message = ''
-              Either `config` or `configFile` should be set.
+              Either `config` or `configFile` should be only set.
             '';
           }
         ];
