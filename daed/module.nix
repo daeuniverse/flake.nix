@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   cfg = config.services.daed;
@@ -8,12 +13,10 @@ in
   disabledModules = [ "services/networking/daed.nix" ];
 
   options = {
-    services.daed = with lib;{
+    services.daed = with lib; {
       enable = mkEnableOption "A modern dashboard for dae";
 
-      package = mkOption {
-        defaultText = lib.literalMD "`packages.daed` from this flake";
-      };
+      package = mkOption { defaultText = lib.literalMD "`packages.daed` from this flake"; };
 
       configDir = mkOption {
         type = types.str;
@@ -44,17 +47,19 @@ in
       };
 
       openFirewall = mkOption {
-        type = with types; submodule {
-          options = {
-            enable = mkEnableOption "enable";
-            port = mkOption {
-              type = types.int;
-              description = ''
-                Port to be opened. Consist with field `tproxy_port` in config file.
-              '';
+        type =
+          with types;
+          submodule {
+            options = {
+              enable = mkEnableOption "enable";
+              port = mkOption {
+                type = types.int;
+                description = ''
+                  Port to be opened. Consist with field `tproxy_port` in config file.
+                '';
+              };
             };
           };
-        };
         default = {
           enable = true;
           port = 12345;
@@ -70,51 +75,51 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable
+  config =
+    lib.mkIf cfg.enable
 
-    {
-      environment.systemPackages = [ cfg.package ];
-      systemd.packages = [ cfg.package ];
+      {
+        environment.systemPackages = [ cfg.package ];
+        systemd.packages = [ cfg.package ];
 
-      networking = lib.mkIf cfg.openFirewall.enable {
-        firewall =
-          let portToOpen = cfg.openFirewall.port;
+        networking = lib.mkIf cfg.openFirewall.enable {
+          firewall =
+            let
+              portToOpen = cfg.openFirewall.port;
+            in
+            {
+              allowedTCPPorts = [ portToOpen ];
+              allowedUDPPorts = [ portToOpen ];
+            };
+        };
+
+        systemd.services.daed =
+          let
+            daedBin = lib.getExe cfg.package;
           in
           {
-            allowedTCPPorts = [ portToOpen ];
-            allowedUDPPorts = [ portToOpen ];
+            wantedBy = [ "multi-user.target" ];
+            after = [
+              "network-online.target"
+              "systemd-sysctl.service"
+            ];
+            wants = [ "network-online.target" ];
+
+            preStart = ''
+              umask 0077
+              mkdir -p ${cfg.configDir}
+              ${lib.foldl' (acc: elem: acc + elem + "\n") "" (
+                map (n: "ln -sfn ${n} ${cfg.configDir}") cfg.assetsPaths
+              )}
+            '';
+            serviceConfig = {
+              Type = "simple";
+              User = "root";
+              LimitNPROC = 512;
+              LimitNOFILE = 1048576;
+              ExecStart = "${daedBin} run -c ${cfg.configDir} -l ${cfg.listen}";
+              Restart = "on-abnormal";
+            };
           };
       };
-
-      systemd.services.daed =
-        let
-          daedBin = lib.getExe cfg.package;
-        in
-        {
-          wantedBy = [ "multi-user.target" ];
-          after = [
-            "network-online.target"
-            "systemd-sysctl.service"
-          ];
-          wants = [
-            "network-online.target"
-          ];
-
-          preStart = ''
-            umask 0077
-            mkdir -p ${cfg.configDir}
-            ${lib.foldl' (acc: elem: acc + elem + "\n") "" 
-                (map (n: "ln -sfn ${n} ${cfg.configDir}")
-                  cfg.assetsPaths)}
-          '';
-          serviceConfig = {
-            Type = "simple";
-            User = "root";
-            LimitNPROC = 512;
-            LimitNOFILE = 1048576;
-            ExecStart = "${daedBin} run -c ${cfg.configDir} -l ${cfg.listen}";
-            Restart = "on-abnormal";
-          };
-        };
-    };
 }
