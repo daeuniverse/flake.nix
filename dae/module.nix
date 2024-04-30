@@ -143,6 +143,7 @@ in
                 ++ (with lib; optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
               ExecStart = [ "" "${daeBin} run --disable-timestamp -c ${configPath}" ];
               Environment = "DAE_LOCATION_ASSET=${cfg.assetsPath}";
+              TimeoutStartSec = 120;
             };
           };
 
