@@ -1,7 +1,8 @@
-{ lib
-, clang
-, fetchFromGitHub
-, buildGoModule
+{
+  lib,
+  clang,
+  fetchFromGitHub,
+  buildGoModule,
 }:
 let
   metadata = builtins.fromJSON (builtins.readFile ./metadata.json);

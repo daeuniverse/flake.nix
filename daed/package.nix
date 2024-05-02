@@ -1,7 +1,8 @@
-{ mkPnpmPackage
-, clang
-, buildGoModule
-, fetchFromGitHub
+{
+  mkPnpmPackage,
+  clang,
+  buildGoModule,
+  fetchFromGitHub,
 }:
 
 let
@@ -46,8 +47,6 @@ let
     # network required
     doCheck = false;
   };
-
-
 in
 buildGoModule rec {
   name = "daed";
