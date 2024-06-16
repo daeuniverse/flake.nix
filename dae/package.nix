@@ -29,10 +29,10 @@ buildGoModule rec {
     "-X github.com/daeuniverse/dae/common/consts.MaxMatchSetLen_=64"
   ];
 
-  preBuild = ''
+  buildPhase = ''
     make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
     NOSTRIP=y \
-    ebpf
+    OUTPUT=$out/bin/dae
   '';
 
   # network required
