@@ -1,6 +1,6 @@
 {
-  "version": "v0.6.0rc2",
-  "rev": "v0.6.0rc2",
-  "hash": "sha256-u+1DkcdXXm/wmKG7yu8nv3OOeG/l5KC+9UcIrYOmsUA=",
-  "vendorHash": "sha256-jJbXa3xnQXhEhrhmdi+JqdinLuRrFY5Tb9lsnCancFE="
+  "version": "v0.6.0",
+  "rev": "v0.6.0",
+  "hash": "sha256-RO0XsGyIgf2PQekiC71HirEPp2SQDJpiAbjg7TyaGVQ=",
+  "vendorHash": "sha256-KFe0hGAXn4mrWCsU91cfUZc21SgJes6XXFhAKrqmULE="
 }
