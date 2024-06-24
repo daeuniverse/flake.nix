@@ -5,6 +5,7 @@
   clang,
   buildGoModule,
   fetchFromGitHub,
+  lib,
 }:
 
 let
@@ -29,10 +30,16 @@ let
       pnpm.configHook
     ];
 
-    buildPhase = "pnpm build";
+    buildPhase = ''
+      runHook preBuild
+      pnpm build
+      runHook postBuild
+    '';
     installPhase = ''
+      runHook preInstall
       mkdir -p $out
       mv dist/* $out/
+      runHook postInstall
     '';
   });
 
@@ -55,13 +62,17 @@ let
     nativeBuildInputs = [ clang ];
 
     buildPhase = ''
+      runHook preBuild
       make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
       NOSTRIP=y \
       ebpf
+      runHook postBuild
     '';
     installPhase = ''
+      runHook preInstall
       mkdir $out
       cp -r ./* $out
+      runHook postInstall
     '';
 
     # network required
@@ -121,4 +132,14 @@ buildGoModule rec {
     mv $out/bin/dae-wing $out/bin/daed
     rm $out/bin/{input,resolver}
   '';
+
+  meta = {
+    description = "Modern dashboard with dae";
+    homepage = "https://github.com/daeuniverse/daed";
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ oluceps ];
+    platforms = lib.platforms.linux;
+    mainProgram = "daed";
+  };
+
 }
