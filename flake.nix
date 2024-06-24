@@ -39,9 +39,7 @@
             ...
           }:
           {
-            _module.args.pkgs = import inputs.nixpkgs {
-              inherit system;
-            };
+            _module.args.pkgs = import inputs.nixpkgs { inherit system; };
 
             packages = {
               dae = pkgs.callPackage ./dae/package.nix { };
