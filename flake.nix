@@ -3,10 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pnpm2nix = {
-      url = "github:Ninlives/pnpm2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,7 +41,6 @@
           {
             _module.args.pkgs = import inputs.nixpkgs {
               inherit system;
-              overlays = with inputs; [ pnpm2nix.overlays.default ];
             };
 
             packages = {

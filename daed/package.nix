@@ -1,12 +1,18 @@
 {
-  mkPnpmPackage,
+  pnpm,
+  nodejs,
+  stdenv,
   clang,
   buildGoModule,
   fetchFromGitHub,
 }:
 
 let
-  dist = mkPnpmPackage {
+  dist = stdenv.mkDerivation (finalAttrs: {
+    name = "daed-dist";
+    pname = "daed-dist";
+    version = "0.6.0-unstable-2024-06-16";
+
     src = fetchFromGitHub {
       owner = "daeuniverse";
       repo = "daed";
@@ -14,21 +20,35 @@ let
       rev = "32d1af726298ca033209a1a7b16e6b24f8792de3";
       hash = "sha256-t6rPnOjzCM2azfAc7u+KL/Yfw5lNo/m2GcFEGBnZvZE=";
     };
-  };
+    pnpmDeps = pnpm.fetchDeps {
+      inherit (finalAttrs) version src pname;
+      hash = "sha256-H0VYhK4myqZ5xqwJRJSF2okWN2fUsJUx+RU5fipbM5I=";
+    };
+    nativeBuildInputs = [
+      nodejs
+      pnpm.configHook
+    ];
+
+    buildPhase = "pnpm build";
+    installPhase = ''
+      mkdir -p $out
+      mv dist/* $out/
+    '';
+  });
 
   dae-ebpf = buildGoModule rec {
     pname = "dae";
-    version = "ebpf";
+    version = "dae-ebpf-0.6.0-unstable-2024-06-16";
 
     src = fetchFromGitHub {
       owner = "daeuniverse";
       repo = pname;
-      rev = "92596cd01e1b90e92b51a2f5dea867010ced6dbe";
-      hash = "sha256-DY32iX8o4cd/c6IJt+oEYzD8kpocn/Tl5lU15PcoE6M=";
+      rev = "8e9311e0f76da739e51be54905318ca175a4cc53";
+      hash = "sha256-B4PLEb0HUHBp+C+c4hlTtXp84FWJk/xVpggW/gufcpk=";
       fetchSubmodules = true;
     };
 
-    vendorHash = "sha256-rZwK+mYWJqgLFhzwZTfCC4tIg2gtNtx7Lu/fyOL3ozA=";
+    vendorHash = "sha256-AtYLxR7Fw3+IOSeuPXlq4vMsnS+7MMaFANZDg0yvCl8=";
 
     proxyVendor = true;
 
@@ -50,16 +70,16 @@ let
 in
 buildGoModule rec {
   name = "daed";
-  version = "unstable-2023-08-22";
+  version = "0.6.0-unstable-2024-06-16";
 
   src = fetchFromGitHub {
     owner = "daeuniverse";
     repo = "dae-wing";
-    rev = "bcfba3a71bd1bd55a690a38d5efcd2a31ef43001";
-    hash = "sha256-LzHXdm98Ny/UFIasPGD08YD/mEX6MRtwFUnk44hnpbU=";
+    rev = "d832011a0392239ce40e16b08c0fe80bbd1e9ff7";
+    hash = "sha256-uijsoHm0RgPUpnDaNG8a599MMiBtbgWtjLGUKeSWIDg=";
   };
 
-  vendorHash = "sha256-IGORrj9br8fQyu2m23ukCNFR8M5EHW6spR18B+eowtw=";
+  vendorHash = "sha256-zqYYEo33OU+lLNA8sVCm3O4tJoQ8UlRwSrEHYoeqrTc=";
   proxyVendor = true;
   preBuild = ''
     # replace built dae ebpf bindings
