@@ -57,6 +57,8 @@ let
 
     vendorHash = "sha256-AtYLxR7Fw3+IOSeuPXlq4vMsnS+7MMaFANZDg0yvCl8=";
 
+    hardeningDisable = [ "zerocallusedregs" ];
+
     proxyVendor = true;
 
     nativeBuildInputs = [ clang ];
