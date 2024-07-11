@@ -22,16 +22,10 @@ buildGoModule rec {
 
   nativeBuildInputs = [ clang ];
 
-  ldflags = [
-    "-s"
-    "-w"
-    "-X github.com/daeuniverse/dae/cmd.Version=${version}"
-    "-X github.com/daeuniverse/dae/common/consts.MaxMatchSetLen_=64"
-  ];
-
   buildPhase = ''
     make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
     NOSTRIP=y \
+    VERSION=${version} \
     OUTPUT=$out/bin/dae
   '';
 
