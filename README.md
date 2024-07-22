@@ -24,7 +24,6 @@
 }
 ```
 
-
 2. Enable dae or daed module.
 
 > To see full options, check `dae{,d}/module.nix`.
@@ -56,7 +55,6 @@
   };
 }
 ```
-
 
 ```nix
 # nixos configuration module
@@ -94,7 +92,7 @@
 
 ## Nightly build
 
-If you would like to get a taste of new features and do not want to wait for new releases, you may use the `nightly` (unstable branch) flake. The `nightly` flake is always _**up-to-date**_ with the upstream `dae` and `daed` (sync with the `main` branch) projects. Most of the time, newly proposed changes will be included in PRs, will be fully tested, and will be exported as cross-platform executable binaries in builds (GitHub Action Workflow Build).
+If you would like to get a taste of new features and do not want to wait for new releases, you may use the `nightly` (`unstable` branch) flake. The `nightly` flake is always _**up-to-date**_ with the upstream `dae` and `daed` (sync with the `main` branch) projects. Most of the time, newly proposed changes will be included in PRs, will be fully tested, and will be exported as cross-platform executable binaries in builds (GitHub Action Workflow Build). If you would like to test out any unpublished changes, feel free to use the `experiment` branch which is pinned to a specific commit in a feature branch from the upstream repositories.
 
 > [!WARNING]
 > Noted that newly introduced features are sometimes buggy, do it at your own risk. However, we still highly encourage you to check out our latest builds as it may help us further analyze features stability and resolve potential bugs accordingly.
@@ -104,10 +102,36 @@ Adopt nightly flake
 ```nix
 # flake.nix
 {
+  # unstable
   inputs.daeuniverse.url = "github:daeuniverse/flake.nix/unstable";
+  # OR
+  # experiment
+  inputs.daeuniverse.url = "github:daeuniverse/flake.nix/experiment";
   # ...
 }
 ```
+
+## Release build
+
+If you prefer to use a more stable version of our software, you can use the `release` branch. This branch is designated for our official releases. We create release tags based on this branch to ensure stability and reliability.
+
+Whenever there is a new release from the upstream projects (`dae` and `daed`), we will also create a corresponding release tag in our repository, such as `dae-v0.7.0`. These tags represent the stable versions of our software, thoroughly tested and ready for production use.
+
+Adopt release flake
+
+```nix
+# flake.nix
+{
+  # latest release
+  inputs.daeuniverse.url = "github:daeuniverse/flake.nix/release";
+  # OR
+  # specific tag
+  inputs.daeuniverse.url = "github:daeuniverse/flake.nix?tag=<tag>";
+  # ...
+}
+```
+
+This way, users can choose the `release` branch and tags for stable, `production-ready` versions.
 
 ## Binary cache
 
@@ -126,4 +150,4 @@ nix.settings = {
 
 ## License
 
-[ISC](./LICENSE) © 2023 daeuniverse
+[ISC](./LICENSE) © 2023-2024 @daeuniverse
