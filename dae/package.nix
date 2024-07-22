@@ -22,6 +22,8 @@ buildGoModule rec {
 
   nativeBuildInputs = [ clang ];
 
+  hardeningDisable = [ "zerocallusedregs" ];
+
   buildPhase = ''
     make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
     NOSTRIP=y \
