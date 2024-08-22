@@ -1,3 +1,5 @@
+name: Update binary cache
+
 on:
   pull_request:
   push:
@@ -10,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: build-${{matrix.jobs.branch}}-${{matrix.jobs.target}}
     steps:
-    - uses: actions/checkout@v4
-    - name: setup-nix
-      uses: DeterminateSystems/nix-installer-action@main
-      with:
-        extra-conf: |
-          extra-substituters = https://daeuniverse.cachix.org
-          extra-trusted-public-keys = daeuniverse.cachix.org-1:8hRIzkQmAKxeuYY3c/W1I7QbZimYphiPX/E7epYNTeM=
-    - name: build
-      env:
-        CACHIX_AUTH_TOKEN: "${{ secrets.cachix_auth_token }}"
-      run: nix develop -c ./main.nu build
+      - uses: actions/checkout@v4
+      - name: setup-nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://daeuniverse.cachix.org
+            extra-trusted-public-keys = daeuniverse.cachix.org-1:8hRIzkQmAKxeuYY3c/W1I7QbZimYphiPX/E7epYNTeM=
+      - name: build
+        env:
+          CACHIX_AUTH_TOKEN: "${{ secrets.cachix_auth_token }}"
+        run: nix develop -c ./main.nu build
