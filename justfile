@@ -34,6 +34,28 @@ prefetch-url url:
 prefetch-git repo rev:
   @nix-prefetch-git --url 'git@github.com:{{ repo }}' --rev '{{ rev }}' --fetch-submodules --quiet
 
+# update metadata for a project based off the latest upstream git commit
+update-metadata project:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Fetch the metadata for the project
+    json_output=$(just prefetch-git daeuniverse/{{ project }} refs/heads/main | jq)
+    # Extract the necessary values from the json_output
+    version=$(echo "$json_output" | jq -r '.version')
+    date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
+    rev=$(echo "$json_output" | jq -r '.rev')
+    rev_short=$(echo "$json_output" | jq -r '.rev' | cut -c1-7)
+    hash=$(echo "$json_output" | jq -r '.hash')
+    # Update the metadata.json file
+    jq --arg version "unstable-$date.$rev_short" \
+       --arg rev "$rev" \
+       --arg hash "$hash" \
+       '.version = $version | .rev = $rev | .hash = $hash' \
+       ./{{ project }}/metadata.json | tee ./{{ project }}/metadata.json.tmp
+    # Replace the original file
+    mv ./{{ project }}/{metadata.json.tmp,metadata.json}
+    
+
 # stage all files
 add:
   @git add .
