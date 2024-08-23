@@ -136,15 +136,15 @@ This way, users can choose the `release` branch and tags for stable, `production
 
 ## Binary cache
 
-If you like to fetch derivations from our cache where the build artefacts are pushed, it is available in [daeuniverse.cachix.org](https://app.cachix.org/cache/daeuniverse#pull).
+We use garnix cache and provide both `x86_64-linux` and `aarch64-linux` build products.
 
-To enable it in flake:
+To setup the garnix cache:
 
 ```nix
 nix.settings = {
-  substituers = ["https://daeuniverse.cachix.org"];
+  substituers = ["https://cache.garnix.io"];
   trusted-public-keys = [
-    "daeuniverse.cachix.org-1:8hRIzkQmAKxeuYY3c/W1I7QbZimYphiPX/E7epYNTeM="
+    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
   ];
 };
 ```
