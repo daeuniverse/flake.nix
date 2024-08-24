@@ -1,0 +1,43 @@
+name: Auto merge changes made to the target branches in a pull request
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  sync-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      matrix:
+        include:
+          - branch: release
+            labels: branch/release
+      fail-fast: false
+    steps:
+      - name: Generate GitHub Auth Token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Auto merge changes in the target PR
+        id: automerge
+        # https://github.com/pascalgn/automerge-action
+        uses: "pascalgn/automerge-action@v0.16.3"
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          MERGE_LABELS: "automerge"
+          MERGE_REMOVE_LABELS: "automerge"
+          MERGE_METHOD: "squash"
+          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge {pullRequest.number}"
+          MERGE_FORKS: "false"
+          MERGE_RETRIES: "0"
+          MERGE_RETRY_SLEEP: "0"
+          MERGE_REQUIRED_APPROVALS: "0"
+          BASE_BRANCHES: "unstable,experiment"
