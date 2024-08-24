@@ -23,6 +23,14 @@ jobs:
             labels: branch/release
       fail-fast: false
     steps:
+      - name: Generate GitHub Auth Token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@main
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -38,4 +46,5 @@ jobs:
           team-reviewers: ${{ env.PR_TEAM_REVIEWERS }}
           title: '[cherry-pick] {old_title}'
           body: 'ci: cherry picking #{old_pull_request_id} onto ${{ matrix.branch }}'
-
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
