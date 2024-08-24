@@ -31,7 +31,7 @@ jobs:
       - name: Auto merge changes in the target PR
         id: automerge
         # https://github.com/pascalgn/automerge-action
-        uses: "pascalgn/automerge-action@v0.16.3"
+        uses: pascalgn/automerge-action@main
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           MERGE_LABELS: "automerge"
