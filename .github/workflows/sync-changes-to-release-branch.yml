@@ -35,7 +35,17 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          SHA=$(git rev-parse --short ${{ github.event.pull_request.merge_commit_sha }})
+          echo "COMMIT_SHORT_SHA=$SHA" >> $GITHUB_ENV
+
+      - name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
+
       - name: Cherry pick changes into target branch
+        # https://github.com/carloscastrojumo/github-cherry-pick-action
         uses: carloscastrojumo/github-cherry-pick-action@v1.0.1
         with:
           branch: ${{ matrix.branch }}
@@ -45,5 +55,6 @@ jobs:
           team-reviewers: ${{ env.PR_TEAM_REVIEWERS }}
           title: '[cherry-pick] {old_title}'
           body: 'ci: cherry picking #{old_pull_request_id} onto ${{ matrix.branch }}'
+          cherry-pick-branch: cherrypick-${{ env.COMMIT_SHORT_SHA }}-${{ github.run_id }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
