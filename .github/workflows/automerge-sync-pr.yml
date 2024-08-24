@@ -14,8 +14,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - branch: release
-            labels: branch/release
+          - branch: unstable
+            labels: branch/unstable
+          - branch: experiment
+            labels: branch/experiment
       fail-fast: false
     steps:
       - name: Generate GitHub Auth Token
