@@ -54,5 +54,6 @@ jobs:
           team-reviewers: ${{ env.PR_TEAM_REVIEWERS }}
           title: '[cherry-pick] {old_title}'
           body: 'ci: cherry picking #{old_pull_request_id} onto ${{ matrix.branch }}'
+          cherry-pick-branch: cherry-pick-${inputs.branch}-${commitSha}-${{ github.run_id }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
