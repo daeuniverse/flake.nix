@@ -53,7 +53,7 @@ jobs:
 
       - name: Cherry pick changes into target branch
         # https://github.com/carloscastrojumo/github-cherry-pick-action
-        uses: carloscastrojumo/github-cherry-pick-action@v1.0.1
+        uses: carloscastrojumo/github-cherry-pick-action@main
         with:
           branch: ${{ matrix.branch }}
           labels: |
