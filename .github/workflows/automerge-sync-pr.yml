@@ -1,12 +1,12 @@
 name: Auto merge changes made to the target branches in a pull request
 
 on:
-  pull_request:
-    types:
-      - opened
-    branches:
-      - unstable
-      - experiment
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number
+        required: true
+        type: string
 
 jobs:
   sync-changes:
@@ -14,14 +14,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    strategy:
-      matrix:
-        include:
-          - branch: unstable
-            labels: branch/unstable
-          - branch: experiment
-            labels: branch/experiment
-      fail-fast: false
     steps:
       - name: Generate GitHub Auth Token
         # https://github.com/tibdex/github-app-token
@@ -37,12 +29,13 @@ jobs:
         uses: pascalgn/automerge-action@main
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-          MERGE_LABELS: "automerge"
-          MERGE_REMOVE_LABELS: "automerge"
-          MERGE_METHOD: "squash"
-          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge {pullRequest.number}"
-          MERGE_FORKS: "false"
-          MERGE_RETRIES: "0"
-          MERGE_RETRY_SLEEP: "0"
-          MERGE_REQUIRED_APPROVALS: "0"
+          MERGE_LABELS: automerge
+          MERGE_REMOVE_LABELS: automerge
+          MERGE_METHOD: squash
+          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge ${{ inputs.pr_number }}"
+          MERGE_FORKS: false
+          MERGE_RETRIES: 0
+          MERGE_RETRY_SLEEP: 0
+          MERGE_REQUIRED_APPROVALS: 0
           BASE_BRANCHES: "unstable,experiment"
+          PULL_REQUEST: ${{ inputs.pr_number }}
