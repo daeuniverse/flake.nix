@@ -4,6 +4,9 @@ on:
   pull_request:
     types:
       - opened
+    branches:
+      - unstable
+      - experiment
 
 jobs:
   sync-changes:
