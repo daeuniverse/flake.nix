@@ -23,7 +23,9 @@ jobs:
       matrix:
         include:
           - branch: unstable
-            labels: branch/unstable
+            labels: |
+              branch/unstable
+              automerge
           - branch: experiment
             labels: branch/experiment
       fail-fast: false
