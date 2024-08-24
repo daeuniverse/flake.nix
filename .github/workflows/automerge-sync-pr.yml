@@ -40,4 +40,4 @@ jobs:
           MERGE_RETRIES: "0"
           MERGE_RETRY_SLEEP: "0"
           MERGE_REQUIRED_APPROVALS: "0"
-          
+          BASE_BRANCHES: "unstable,experiment"
