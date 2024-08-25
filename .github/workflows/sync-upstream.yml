@@ -10,6 +10,10 @@ on:
           - dae
           - daed
         required: true
+      branch:
+        type: string
+        description: branch to sync with
+        default: unstable
 
 jobs:
   sync-upstream:
@@ -26,6 +30,7 @@ jobs:
       - uses: actions/checkout@main
         with:
           token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ inputs.branch }}
 
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
