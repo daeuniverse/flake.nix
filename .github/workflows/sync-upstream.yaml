@@ -5,7 +5,7 @@ on:
     inputs:
       project:
         type: string
-        description: flake input to be synced
+        description: upstream project name
         options:
           - dae
           - daed
@@ -41,7 +41,7 @@ jobs:
           echo json_output=$out >> "$GITHUB_OUTPUT"
           echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
 
-      - name: update metadata for a project based off the latest upstream git commit
+      - name: Update metadata for a project based off the latest upstream git commit
         id: update_metadata
         shell: bash
         run: |
