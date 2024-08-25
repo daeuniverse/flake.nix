@@ -36,9 +36,8 @@ jobs:
         shell: bash
         run: |
           #!/usr/bin/env bash
-          set -euo pipefail
-          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'https://github.com/${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | jq -r '.rev' | cut -c1-7)
-          echo json_output=$out >> "$GITHUB_OUTPUT"
+          set -exuo pipefail
+          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'https://github.com/${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | tee output.json)
           echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
 
       - name: Update metadata for a project based off the latest upstream git commit
@@ -46,9 +45,10 @@ jobs:
         shell: bash
         run: |
           #!/usr/bin/env bash
-          set -euo pipefail
-          # Fetch the metadata for the project
-          json_output="${{ steps.upstream_commit.outputs.json_output }}"
+          set -exuo pipefail
+          # Convert the output from previous step to valid JSON format
+          project=${{ inputs.project }}
+          json_output=$(cat output.json)
           # Extract the necessary values from the json_output
           version=$(echo "$json_output" | jq -r '.version')
           date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
@@ -60,11 +60,12 @@ jobs:
             --arg rev "$rev" \
             --arg hash "$hash" \
             '.version = $version | .rev = $rev | .hash = $hash' \
-            ./{{ inputs.project }}/metadata.json | tee ./{{ inputs.project }}/metadata.json.tmp
+            ./$project/metadata.json | tee ./$project/metadata.json.tmp
           # Replace the original file
-          mv ./{{ inputs.project }}/{metadata.json.tmp,metadata.json}
+          mv ./$project/{metadata.json.tmp,metadata.json}
 
-      - uses: EndBug/add-and-commit@main
+      - name: Commit changes and push
+        uses: EndBug/add-and-commit@main
         with:
           add: "${{ inputs.project }}/metadata.json"
           commit: --signoff
