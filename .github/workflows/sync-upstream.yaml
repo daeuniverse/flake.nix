@@ -2,34 +2,70 @@ name: Synchronize upstream
 
 on:
   workflow_dispatch:
+    inputs:
+      project:
+        type: string
+        description: flake input to be synced
+        options:
+          - dae
+          - daed
+        required: true
 
 jobs:
   sync-upstream:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Generate GitHub auth token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
         with:
-          ref: main
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@main
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
 
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
 
-      - name: Check if sync-upstream branch exists in remote
-        id: check_remote_branch
-        run: |
-          echo "stdout=$(git ls-remote --heads origin unstable)" >> $GITHUB_OUTPUT
-
-      - name: update dae package
-        run: |
-          git config user.name "daebot"
-          git config user.email "daebot@v2raya.org"
-          git checkout -B unstable
-
-          nix run nixpkgs#nix-update -- --commit --version=branch --flake dae
-
-          if [[ "${{ steps.check_remote_branch.outputs.stdout }}" != '' ]]; then
-            git pull origin unstable --rebase
-          fi
-          git push -u origin unstable
+      - name: Get the latest upstream commit
+        id: upstream_commit
         shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'git@github.com:${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | jq -r '.rev' | cut -c1-7)
+          echo json_output=$out >> "$GITHUB_OUTPUT"
+          echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
+
+      - name: update metadata for a project based off the latest upstream git commit
+        id: update_metadata
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          # Fetch the metadata for the project
+          json_output="${{ steps.upstream_commit.outputs.json_output }}"
+          # Extract the necessary values from the json_output
+          version=$(echo "$json_output" | jq -r '.version')
+          date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
+          rev=$(echo "$json_output" | jq -r '.rev')
+          rev_short=$(echo "$json_output" | jq -r '.rev' | cut -c1-7)
+          hash=$(echo "$json_output" | jq -r '.hash')
+          # Update the metadata.json file
+          jq --arg version "unstable-$date.$rev_short" \
+            --arg rev "$rev" \
+            --arg hash "$hash" \
+            '.version = $version | .rev = $rev | .hash = $hash' \
+            ./{{ inputs.project }}/metadata.json | tee ./{{ inputs.project }}/metadata.json.tmp
+          # Replace the original file
+          mv ./{{ inputs.project }}/{metadata.json.tmp,metadata.json}
+
+      - uses: EndBug/add-and-commit@main
+        with:
+          add: "${{ inputs.project }}/metadata.json"
+          commit: --signoff
+          message: "chore(${{ inputs.project }}): pin ref to refs/head/main (${{ steps.upstream_commit.outputs.sha_short }})"
