@@ -37,7 +37,7 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'git@github.com:${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | jq -r '.rev' | cut -c1-7)
+          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'https://github.com/${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | jq -r '.rev' | cut -c1-7)
           echo json_output=$out >> "$GITHUB_OUTPUT"
           echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
 
