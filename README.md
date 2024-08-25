@@ -44,7 +44,7 @@
 
       /* default options
 
-      package = inputs.daeuniverse.packages.x86_64-linux.daed;
+      package = inputs.daeuniverse.packages.x86_64-linux.dae;
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
@@ -96,7 +96,7 @@
 If you would like to get a taste of new features and do not want to wait for new releases, you may use the `nightly` (`unstable` branch) flake. The `nightly` flake is always _**up-to-date**_ with the upstream `dae` and `daed` (sync with the `main` branch) projects. Most of the time, newly proposed changes will be included in PRs, will be fully tested, and will be exported as cross-platform executable binaries in builds (GitHub Action Workflow Build). If you would like to test out any unpublished changes, feel free to use the `experiment` branch which is pinned to a specific commit in a feature branch from the upstream repositories.
 
 > [!WARNING]
-> Noted that newly introduced features are sometimes buggy, do it at your own risk. However, we still highly encourage you to check out our latest builds as it may help us further analyze features stability and resolve potential bugs accordingly.
+> Note that newly introduced features can sometimes be buggy; use at your own risk. However, we still highly encourage you to check out our latest builds as it may help us further analyze features stability and resolve potential bugs accordingly.
 
 Adopt nightly flake
 
@@ -142,7 +142,7 @@ To setup the garnix cache:
 
 ```nix
 nix.settings = {
-  substituers = ["https://cache.garnix.io"];
+  substituters = ["https://cache.garnix.io"];
   trusted-public-keys = [
     "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
   ];
