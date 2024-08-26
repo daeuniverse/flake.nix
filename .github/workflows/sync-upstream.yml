@@ -75,3 +75,9 @@ jobs:
           add: "${{ inputs.project }}/metadata.json"
           commit: --signoff
           message: "chore(${{ inputs.project }}): pin ref to refs/head/main (${{ steps.upstream_commit.outputs.sha_short }})"
+
+      - name: Build
+        run: |
+          #!/usr/bin/env bash
+          set -exuo pipefail
+          nix build .#${{ inputs.project }}
