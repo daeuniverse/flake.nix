@@ -1,0 +1,83 @@
+name: Synchronize upstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        type: string
+        description: upstream project name
+        options:
+          - dae
+          - daed
+        required: true
+      branch:
+        type: string
+        description: branch to sync with
+        default: unstable
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub auth token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@main
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ inputs.branch }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+
+      - name: Get the latest upstream commit
+        id: upstream_commit
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -exuo pipefail
+          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'https://github.com/${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | tee output.json)
+          echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
+
+      - name: Update metadata for a project based off the latest upstream git commit
+        id: update_metadata
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -exuo pipefail
+          # Convert the output from previous step to valid JSON format
+          project=${{ inputs.project }}
+          json_output=$(cat output.json)
+          # Extract the necessary values from the json_output
+          version=$(echo "$json_output" | jq -r '.version')
+          date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
+          rev=$(echo "$json_output" | jq -r '.rev')
+          rev_short=$(echo "$json_output" | jq -r '.rev' | cut -c1-7)
+          hash=$(echo "$json_output" | jq -r '.hash')
+          # Update the metadata.json file
+          jq --arg version "unstable-$date.$rev_short" \
+            --arg rev "$rev" \
+            --arg hash "$hash" \
+            '.version = $version | .rev = $rev | .hash = $hash' \
+            ./$project/metadata.json | tee ./$project/metadata.json.tmp
+          # Replace the original file
+          mv ./$project/{metadata.json.tmp,metadata.json}
+
+      - name: Commit changes and push
+        uses: EndBug/add-and-commit@main
+        with:
+          add: "${{ inputs.project }}/metadata.json"
+          commit: --signoff
+          message: "chore(${{ inputs.project }}): pin ref to refs/head/main (${{ steps.upstream_commit.outputs.sha_short }})"
+
+      - name: Build
+        run: |
+          #!/usr/bin/env bash
+          set -exuo pipefail
+          nix build .#${{ inputs.project }}
