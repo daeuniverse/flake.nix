@@ -54,6 +54,13 @@ update-metadata project:
        ./{{ project }}/metadata.json | tee ./{{ project }}/metadata.json.tmp
     # Replace the original file
     mv ./{{ project }}/{metadata.json.tmp,metadata.json}
+    # Update vendorHash
+    vendor=$(nix --log-format raw build .#{{ project }} 2>&1 | grep  "got: " | awk '/got: / {print $NF}' || echo "")
+    jq --arg vendor "$vendor" \
+       '.vendorHash = $vendor' \
+       ./{{ project }}/metadata.json | tee ./{{ project }}/metadata.json.tmp
+    mv ./{{ project }}/{metadata.json.tmp,metadata.json}
+
     
 
 # stage all files
