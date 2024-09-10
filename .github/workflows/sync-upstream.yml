@@ -66,13 +66,27 @@ jobs:
             --arg hash "$hash" \
             '.version = $version | .rev = $rev | .hash = $hash' \
             ./$project/metadata.json | tee ./$project/metadata.json.tmp
-          # Replace the original file
           mv ./$project/{metadata.json.tmp,metadata.json}
-          # Update vendorHash
-          vendor=$(nix --log-format raw build .#$project 2>&1 | grep  "got: " | awk '/got: / {print $NF}' || echo "")
+          # Retry logic for awk extraction
+          max_retries=3
+          retry_count=0
+          until [ "$retry_count" -ge "$max_retries" ]; do
+            vendor=$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}')
+            if [ -n "$vendor" ]; then
+              break
+            fi
+            retry_count=$((retry_count + 1))
+            echo "Retrying nix command and awk extraction ($retry_count/$max_retries)..."
+            sleep 3
+          done
+          if [ -z "$vendor" ]; then
+            echo "awk extraction failed after $max_retries attempts."
+            exit 1
+          fi
+          # Update vendorHash in metadata.json
           jq --arg vendor "$vendor" \
-             '.vendorHash = $vendor' \
-             ./$project/metadata.json | tee ./$project/metadata.json.tmp
+            '.vendorHash = $vendor' \
+            ./$project/metadata.json | tee ./$project/metadata.json.tmp
           mv ./$project/{metadata.json.tmp,metadata.json}
 
       - name: Commit changes and push
