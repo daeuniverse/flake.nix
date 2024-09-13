@@ -71,7 +71,7 @@ jobs:
           max_retries=3
           retry_count=0
           until [ "$retry_count" -ge "$max_retries" ]; do
-            vendor=$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}')
+            vendor=$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}' || echo "")
             if [ -n "$vendor" ]; then
               break
             fi
@@ -79,6 +79,7 @@ jobs:
             echo "Retrying nix command and awk extraction ($retry_count/$max_retries)..."
             sleep 3
           done
+          echo "Final vendor value: '$vendor'"
           if [ -z "$vendor" ]; then
             echo "awk extraction failed after $max_retries attempts."
             exit 1
