@@ -76,30 +76,32 @@ jobs:
           vendor=
           until [ "$retry_count" -ge "$max_retries" ]; do
             vendor="$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}' || echo '')"
+            vendor_fetch_status=$?
             if [ -n "$vendor" ]; then
               # If $vendor is not empty, extraction succeeded
+              vendor_fetch_status=0
               break
             fi
             retry_count=$((retry_count + 1))
             echo "Retrying nix command and awk extraction ($retry_count/$max_retries)..."
             sleep 3
           done
-          # If the vendor is still empty after max retries, exit with failure
-          if [ -z "$vendor" ]; then
+          if [ "$vendor_fetch_status" -ne 0 ]; then
+            echo "nix command failed with status $vendor_fetch_status."
             echo "awk extraction failed after $max_retries attempts."
             exit 1
           fi
-          # Continue with script execution using $vendor
-          echo "Vendor extraction succeeded: $vendor"
-          
+
           if [ -z "$vendor" ]; then
             # if $vendor is empty
             # use original vendorHash
             vendor="$(jq -r '.vendorHash' $project/metadata.json)"
           fi
 
+          # Continue with script execution using $vendor
+          echo "Vendor extraction succeeded: $vendor"
+
           # Update vendorHash in metadata.json
-          echo "Final vendor value: '$vendor'"
           jq --arg vendor "$vendor" \
             '.vendorHash = $vendor' \
             ./$project/metadata.json | tee ./$project/metadata.json.tmp
