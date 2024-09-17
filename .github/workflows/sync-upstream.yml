@@ -50,16 +50,18 @@ jobs:
         shell: bash
         run: |
           #!/usr/bin/env bash
-          set -exuo pipefail
+          set -exo pipefail
+          
           # Convert the output from previous step to valid JSON format
           project=${{ inputs.project }}
           json_output=$(cat output.json)
+          
           # Extract the necessary values from the json_output
-          version=$(echo "$json_output" | jq -r '.version')
           date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
           rev=$(echo "$json_output" | jq -r '.rev')
           rev_short=$(echo "$json_output" | jq -r '.rev' | cut -c1-7)
           hash=$(echo "$json_output" | jq -r '.hash')
+          
           # Update the metadata.json file
           jq --arg version "unstable-$date.$rev_short" \
             --arg rev "$rev" \
@@ -67,24 +69,37 @@ jobs:
             '.version = $version | .rev = $rev | .hash = $hash' \
             ./$project/metadata.json | tee ./$project/metadata.json.tmp
           mv ./$project/{metadata.json.tmp,metadata.json}
+          
           # Retry logic for awk extraction
           max_retries=3
           retry_count=0
+          vendor=
           until [ "$retry_count" -ge "$max_retries" ]; do
-            vendor=$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}' || echo "")
+            vendor="$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}' || echo '')"
             if [ -n "$vendor" ]; then
+              # If $vendor is not empty, extraction succeeded
               break
             fi
             retry_count=$((retry_count + 1))
             echo "Retrying nix command and awk extraction ($retry_count/$max_retries)..."
             sleep 3
           done
-          echo "Final vendor value: '$vendor'"
+          # If the vendor is still empty after max retries, exit with failure
           if [ -z "$vendor" ]; then
             echo "awk extraction failed after $max_retries attempts."
             exit 1
           fi
+          # Continue with script execution using $vendor
+          echo "Vendor extraction succeeded: $vendor"
+          
+          if [ -z "$vendor" ]; then
+            # if $vendor is empty
+            # use original vendorHash
+            vendor="$(jq -r '.vendorHash' $project/metadata.json)"
+          fi
+
           # Update vendorHash in metadata.json
+          echo "Final vendor value: '$vendor'"
           jq --arg vendor "$vendor" \
             '.vendorHash = $vendor' \
             ./$project/metadata.json | tee ./$project/metadata.json.tmp
