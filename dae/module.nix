@@ -87,12 +87,20 @@ in
       };
 
       configFile = mkOption {
-        type = with types; (nullOr path);
+        type =
+          let
+            inherit (types) nullOr addCheck str;
+            isAbsolutePathString = x: lib.substring 0 1 x == "/";
+          in
+          (nullOr (addCheck str isAbsolutePathString))
+          // {
+            description = "${types.str.description} (with check: is absolute path string)";
+          };
         default = null;
-        example = "/path/to/your/config.dae";
+        example = ''"/path/to/your/config.dae"'';
         description = ''
-          The path of dae config file, end with `.dae`.
-          Will fallback to `/etc/dae/config.dae` if this is not set.
+          The absolute path string of dae config file, end with `.dae`.
+          Will fallback to `"/etc/dae/config.dae"` if this is not set.
         '';
       };
 
