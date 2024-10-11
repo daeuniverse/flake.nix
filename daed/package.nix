@@ -9,10 +9,18 @@
 }:
 
 let
-  dist = stdenv.mkDerivation (finalAttrs: {
-    name = "daed-dist";
-    pname = "daed-dist";
-    version = "0.6.0-unstable-2024-06-16";
+  pname = "daed";
+  version = "0.8.0";
+  src = fetchFromGitHub {
+    owner = "daeuniverse";
+    repo = "daed";
+    rev = "refs/tags/v${version}";
+    hash = "sha256-h1j91XIumuzuJnMxgkCjhuXYPLXoDuFFsfmDwmzlTEI=";
+    fetchSubmodules = true;
+  };
+
+  web = stdenv.mkDerivation {
+    inherit pname version src;
 
     src = fetchFromGitHub {
       owner = "daeuniverse";
@@ -92,7 +100,7 @@ buildGoModule rec {
     hash = "sha256-uijsoHm0RgPUpnDaNG8a599MMiBtbgWtjLGUKeSWIDg=";
   };
 
-  vendorHash = "sha256-zqYYEo33OU+lLNA8sVCm3O4tJoQ8UlRwSrEHYoeqrTc=";
+  vendorHash = "sha256-TBR3MmpTdwIwyekU+nrHhzsN31E30+Rqd3FoBL3dl4U=";
   proxyVendor = true;
   preBuild = ''
     # replace built dae ebpf bindings
