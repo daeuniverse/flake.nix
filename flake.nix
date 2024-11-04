@@ -11,6 +11,7 @@
       url = "github:nix-community/nix-eval-jobs";
     };
     devshell.url = "github:numtide/devshell";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   outputs =

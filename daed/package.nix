@@ -22,8 +22,8 @@ let
       hash = "sha256-t6rPnOjzCM2azfAc7u+KL/Yfw5lNo/m2GcFEGBnZvZE=";
     };
     pnpmDeps = pnpm.fetchDeps {
-      inherit (finalAttrs) version src pname;
-      hash = "sha256-H0VYhK4myqZ5xqwJRJSF2okWN2fUsJUx+RU5fipbM5I=";
+      inherit pname version src;
+      hash = "sha256-vqkiZzd5WOeJem0zUyMsJd6/aHHAjlsIQMkNf+SUvHY=";
     };
     nativeBuildInputs = [
       nodejs
