@@ -1,61 +1,117 @@
 #!/usr/bin/env nu
 
-# original from https://github.com/nix-community/nixpkgs-wayland/blob/master/main.nu
-
-let system = "x86_64-linux";
-
-def header [ color: string text: string spacer="▒": string ] {
-  let text = $"($text) "
-  let header = $"("" | fill -c $spacer -w 2) ($text | fill -c $spacer -w 100)"
-  print -e $"(ansi $color)($header)(ansi reset)"
-}
-
 def main [] {
-  print -e "commands: [build]"
+  print -e "commands: [sync] PROJECT VERSION1 VERSION2...\n--rev 'refs/heads/v1.0.0' | rev_hash"
 }
 
-def "main build" [] {
-  buildDrv $"packages.($system)"
-  print -e ""
-}
+# ./main.nu sync dae release unstable
+def "main sync" [
+                project: string,
+                ...versions,
+                --rev (-r): string = ""
+                ] {
+  use std log;
+  let get_branch_info = {|rev| (nix run nixpkgs#nix-prefetch-git
+                    -- --url $'https://github.com/daeuniverse/($project).git'
+                       --rev $rev
+                       --fetch-submodules
+                       --quiet | from json) };
+  let get_rev_short_hash = {|| $in.rev | str substring 0..6 };
 
-
-def buildDrv [ drvRef: string ] {
-  header "white_reverse" $"build ($drvRef)" "░"
-  header "blue_reverse" $"eval ($drvRef)"
-  let evalJobs = (
-    ^nix-eval-jobs
-      --flake $".#($drvRef)"
-      --check-cache-status
-        | from json --objects
-  )
-
-  header "green_reverse" $"build ($drvRef)"
-  print -e ($evalJobs
-    | where isCached == false
-    | select name isCached)
-
-  $evalJobs
-    | where isCached == false
-    | each { |drv| do -c  { ^nix build $'($drv.drvPath)^*' } }
-
-  header "purple_reverse" $"cache: calculate paths: ($drvRef)"
-  let pushPaths = ($evalJobs | each { |drv|
-    $drv.outputs | each { |outPath|
-      if ($outPath.out | path exists) {
-        $outPath.out
-      }
+  let get_vendor_hash = {|v|
+    let res = nix --log-format raw build $'.#($project)-($v)' | complete;
+    if ($res.exit_code == 0) {
+      log info "build success. return"
+      return
     }
-  })
-  print -e $pushPaths
-
-  if ('CACHIX_AUTH_TOKEN' in $env) {
-    let cachePathsStr = ($pushPaths | each {|it| $"($it)(char nl)"} | str join)
-    let cacheResults = (echo $cachePathsStr | ^cachix push daeuniverse | complete)
-    header "purple_reverse" $"cache/push ($drvRef)"
-    print -e $cacheResults
+    let stderr = $res.stderr;
+    let vendor_hash = $stderr | lines | find --regex "got:" | str trim | split row " " | last
+    $vendor_hash
+  }
+  mut metadata = open ./metadata.json
+  let version_to_sync = if (($versions | length) == 0) {
+    ["release" "unstable"]
   } else {
-    print -e "'$CACHIX_AUTH_TOKEN' not set, not pushing to cachix."
+    $versions
   }
 
+  for v in $version_to_sync {
+    match $v {
+      "release" => {
+        log info "updating release"
+        let tag = http get $'https://api.github.com/repos/daeuniverse/($project)/releases/latest' | $in.tag_name;
+        let branch_info = do $get_branch_info $tag;
+        let hash = $branch_info | $in.hash;
+        if ($hash == $metadata.dae.release.hash) { 
+          log info "latest release hash identical. skip"
+          # consider the vendorHash already exist
+          continue
+        }
+        for pair in [[key,value];
+                     [version $tag]
+                     [rev $tag]
+                     [hash $hash]
+                     ] {
+          $metadata = $metadata | update $project { update release { update $pair.key $pair.value } };
+        }
+      }
+      "unstable" => {
+        log info "updating unstable"
+        let rev = 'refs/heads/main';
+        let branch_info = do $get_branch_info $rev;
+        let short_hash = $branch_info | do $get_rev_short_hash;
+        let date = $branch_info | $in.date | format date "%Y-%m-%d"
+        let version = $'unstable-($date).($short_hash)'
+
+        if ($branch_info.hash == $metadata.dae.unstable.hash) { 
+          log info "rev identical. skip"
+          continue
+        }
+        for pair in [[key,value];
+                     [version $version]
+                     [rev $branch_info.rev]
+                     [hash $branch_info.hash]
+                     ] {
+          $metadata = $metadata | update $project { update unstable { update $pair.key $pair.value } };
+        }
+      }
+      # new version
+      _ => {
+        log info "adding new version";
+        if ($rev | is-empty) {
+          log error "must provide rev. skip";
+          continue
+        }
+        if (($version_to_sync | length) > 1) { 
+          log error "syncing new version must specify only one. exiting"
+          return
+        }
+        if ($v in $metadata) { 
+          log error "version already exist. skip"
+          continue
+        }
+
+        let branch_info = do $get_branch_info $rev;
+        let short_hash = $branch_info | do $get_rev_short_hash;
+        let date = $branch_info | $in.date | format date "%Y-%m-%d"
+        let version = $'unstable-($date).($short_hash)'
+
+        
+        $metadata = $metadata | update $project { insert $v {
+            version:$version,
+            rev:$branch_info.rev,
+            hash:$branch_info.hash,
+            vendorHash:""
+          }
+        }
+      }
+    }
+
+    log info "save file for calc vendorHash"
+    $metadata | save ./metadata.json -f
+    $metadata = $metadata | update $project { update $v { update vendorHash (do $get_vendor_hash $v) } };
+  }
+
+  log info "save final file"
+  $metadata | save ./metadata.json -f
 }

@@ -34,6 +34,7 @@
         ];
         perSystem =
           {
+            self',
             pkgs,
             system,
             lib,
@@ -42,10 +43,45 @@
           {
             _module.args.pkgs = import inputs.nixpkgs { inherit system; };
 
-            packages = {
-              dae = pkgs.callPackage ./dae/package.nix { };
-              daed = pkgs.callPackage ./daed/package.nix { };
-            };
+            packages =
+              let
+                metadata = (builtins.fromJSON (builtins.readFile ./metadata.json));
+              in
+              # dae subspecies
+              (
+                let
+                  daeBorn =
+                    {
+                      version,
+                      rev,
+                      hash,
+                      vendorHash,
+                    }:
+                    pkgs.callPackage ./dae/package.nix {
+                      buildGoModule =
+                        args:
+                        pkgs.buildGoModule (
+                          args
+                          // {
+                            inherit version;
+                            src = pkgs.fetchFromGitHub {
+                              owner = "daeuniverse";
+                              repo = "dae";
+                              inherit rev hash;
+                            };
+                            inherit vendorHash;
+                            env.VERSION = version;
+                          }
+                        );
+                    };
+                  daeVers = builtins.attrNames metadata.dae;
+                in
+                lib.listToAttrs (lib.map (v: lib.nameValuePair "dae-${v}" (daeBorn (metadata.dae.${v}))) daeVers)
+              )
+              // {
+                daed = pkgs.callPackage ./daed/package.nix { };
+                dae = self'.packages.dae-release;
+              };
             pre-commit = {
               check.enable = true;
               settings.hooks = {

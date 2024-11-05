@@ -1,0 +1,22 @@
+{
+  "dae": {
+    "release": {
+      "version": "v0.8.0",
+      "rev": "v0.8.0",
+      "hash": "sha256-Vdh5acE5i/bJ8VXOm+9OqZQbxvqv4TS/t0DDfBs/K5g=",
+      "vendorHash": "sha256-0Q+1cXUu4EH4qkGlK6BIpv4dCdtSKjb1RbLi5Xfjcew="
+    },
+    "unstable": {
+      "version": "unstable-2024-11-03.d3ab0b2",
+      "rev": "d3ab0b25e705399d7e610d6f09453623674e20d3",
+      "hash": "sha256-iUVTnFPeWQkFZBsxbnBe/lVO9FTqmQeSzDsgPa5ZqLY=",
+      "vendorHash": "sha256-rGwVsDgcNGWppte0BXQF9p0pKbnjqeNBRn5oNxrxsjU="
+    },
+    "experiment": {
+      "version": "v0.7.0",
+      "rev": "v0.7.0",
+      "hash": "sha256-9iwrwQGpryGyEUVB2reodIxuEQHkXPA4P5IYKj18elI=",
+      "vendorHash": "sha256-AtYLxR7Fw3+IOSeuPXlq4vMsnS+7MMaFANZDg0yvCl8="
+    }
+  }
+}
