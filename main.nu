@@ -1,7 +1,24 @@
 #!/usr/bin/env nu
 
 def main [] {
-  print -e "commands: [sync] PROJECT VERSION1 VERSION2...\n--rev 'refs/heads/v1.0.0' | rev_hash"
+  print -e "commands: [sync] <PROJECT> <VERSIONS...> --rev <REVISION>"
+  print -e $'(char newline)'
+  print -e "REVISION: Any sha1 or references"
+  print -e "          e.g. 'refs/tags/v1.0.0' | 'refs/heads/main' | rev_hash"
+  print -e $'(char newline)'
+  print -e "VERSIONS: List of versions to be updated."
+  print -e "          e.g. release unstable"
+  print -e $'(char newline)'
+  print -e "PROJECT:  Project to be update. Current only support dae."
+  print -e "          e.g. dae"
+  print -e $'(char newline)'
+  print -e 'example:'
+  print -e "  updating unstable"
+  print -e "          ./main.nu sync dae unstable"
+  print -e "  updating unstable and release"
+  print -e "          ./main.nu sync dae unstable release"
+  print -e "  adding a new version"
+  print -e "          ./main.nu sync dae sth-new --rev 'rev_hash'"
 }
 
 # ./main.nu sync dae release unstable
