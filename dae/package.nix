@@ -5,7 +5,7 @@
   buildGoModule,
 }:
 let
-  metadata = builtins.fromJSON (builtins.readFile ./metadata.json);
+  metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).dae.release;
 in
 buildGoModule rec {
   pname = "dae";
@@ -24,10 +24,11 @@ buildGoModule rec {
 
   hardeningDisable = [ "zerocallusedregs" ];
 
+  env.VERSION = version;
+
   buildPhase = ''
     make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
     NOSTRIP=y \
-    VERSION=${version} \
     OUTPUT=$out/bin/dae
   '';
 
