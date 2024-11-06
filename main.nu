@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 def main [] {
-  print -e "commands: [sync] <PROJECT> <VERSIONS...> --rev <REVISION>"
+  print -e "commands: [sync] <PROJECT> [<VERSION>] [--rev <REVISION>]"
   print -e $'(char newline)'
   print -e "REVISION: Any sha1 or references"
   print -e "          e.g. 'refs/tags/v1.0.0' | 'refs/heads/main' | rev_hash"

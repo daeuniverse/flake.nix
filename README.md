@@ -117,7 +117,6 @@ The `main.nu` script on top-level of this repo is able to help you update the pa
 The cmd args looks like:
 ```
 # usage
-commands: [sync] <PROJECT> <VERSIONS...> --rev <REVISION>
 ```
 
 About **adding a new version**, if the `VERSIONS` you provided doesn't match any of `["release" "unstable"]`, it will:
