@@ -44,7 +44,7 @@
 
       /* default options
 
-      package = inputs.daeuniverse.packages.x86_64-linux.dae;
+      package = inputs.daeuniverse.packages.x86_64-linux.dae; or dae-unstable etc.
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
@@ -82,57 +82,75 @@
 
 ## Globally install packages
 
+
+This flake contains serval different revision of packages:
+
++ dae (alias of dae-release)
++ dae-release (current latest release version)
++ dae-unstable (keep sync with dae `main` branch)
++ dae-experiment (specific pull request for untested features)
+
+See details with `nix flake show github:daeuniverse/flake.nix`
+
 ```nix
 # nixos configuration module
 {
   environment.systemPackages =
     with inputs.daeuniverse.packages.x86_64-linux;
-      [ dae daed ];
+      [ dae daed ]; # or dae-unstable dae-experient
 }
 ```
 
-## Nightly build
+## Package Options
 
-If you would like to get a taste of new features and do not want to wait for new releases, you may use the `nightly` (`unstable` branch) flake. The `nightly` flake is always _**up-to-date**_ with the upstream `dae` and `daed` (sync with the `main` branch) projects. Most of the time, newly proposed changes will be included in PRs, will be fully tested, and will be exported as cross-platform executable binaries in builds (GitHub Action Workflow Build). If you would like to test out any unpublished changes, feel free to use the `experiment` branch which is pinned to a specific commit in a feature branch from the upstream repositories.
+- **Nightly Build**: Use the `dae-unstable` package for early access to new features, always synced with the latest updates. For testing specific, unpublished changes, try `dae-experiment`, pinned to feature branch commits.
+
+- **Release Build**: Use the `dae` or `dae-release` package for stable, production-ready version. History versions are available with tags (e.g. `refs/tags/dae-v0.8.0`).
 
 > [!WARNING]
 > Note that newly introduced features can sometimes be buggy; use at your own risk. However, we still highly encourage you to check out our latest builds as it may help us further analyze features stability and resolve potential bugs accordingly.
 
-Adopt nightly flake
+## Script Usage
 
-```nix
-# flake.nix
-{
-  # unstable
-  inputs.daeuniverse.url = "github:daeuniverse/flake.nix/unstable";
-  # OR
-  # experiment
-  inputs.daeuniverse.url = "github:daeuniverse/flake.nix/experiment";
-  # ...
-}
+The `main.nu` script on top-level of this repo is able to help you update the package. See help message with `./main.nu`.
+
+The cmd args looks like:
+```
+# usage
+commands: [sync] <PROJECT> <VERSIONS...> --rev <REVISION>
 ```
 
-## Release build
+About **adding a new version**, if the `VERSIONS` you provided doesn't match any of `["release" "unstable"]`, it will:
 
-If you prefer to use a more stable version of our software, you can use the `release` branch. This branch is designated for our official releases. We create release tags based on this branch to ensure stability and reliability.
++ Check the `--rev` arg and read its value
++ Run `nix-prefetch-git` to get its info
++ Adding a new record to `metadata.json`
++ Update the vendorHash.
 
-Whenever there is a new release from the upstream projects (`dae` and `daed`), we will also create a corresponding release tag in our repository, such as `dae-v0.7.0`. These tags represent the stable versions of our software, thoroughly tested and ready for production use.
+The `--rev` args could pass in with:
 
-Adopt release flake
++ revision hash
++ refs/heads/
++ refs/tags/v0.0.0
 
-```nix
-# flake.nix
-{
-  # latest release
-  inputs.daeuniverse.url = "github:daeuniverse/flake.nix/release";
-  # OR
-  # specific tag
-  inputs.daeuniverse.url = "github:daeuniverse/flake.nix?tag=<tag>";
-  # ...
-}
+Workflow for updating release and unstable:
+
+```
+./main.nu sync dae release unstable # or leave the last 2 args empty
 ```
 
-This way, users can choose the `release` branch and tags for stable, `production-ready` versions.
+workflow for updating single version:
+
+```
+./main.nu sync dae release # or unstable
+```
+
+workflow for adding a new version:
+
+```
+./main.nu sync dae sth-new --rev 'rev_hash' or refs/heads/<branch> or refs/tags/v0.0.0
+# after this will produce a new package called dae-sth-new
+```
 
 ## Binary cache
 
