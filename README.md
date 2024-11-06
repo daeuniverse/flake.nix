@@ -44,7 +44,7 @@
 
       /* default options
 
-      package = inputs.daeuniverse.packages.x86_64-linux.dae; or dae-unstable etc.
+      package = inputs.daeuniverse.packages.x86_64-linux.dae;
       disableTxChecksumIpGeneric = false;
       configFile = "/etc/dae/config.dae";
       assets = with pkgs; [ v2ray-geoip v2ray-domain-list-community ];
@@ -117,19 +117,20 @@ The `main.nu` script on top-level of this repo is able to help you update the pa
 The cmd args looks like:
 ```
 # usage
+commands: [sync] <PROJECT> [<VERSION>] [--rev <REVISION>]
 ```
 
-About **adding a new version**, if the `VERSIONS` you provided doesn't match any of `["release" "unstable"]`, it will:
+About **adding a new version**, if the `VERSION` you provided doesn't match any of `["release" "unstable"]`, it will:
 
 + Check the `--rev` arg and read its value
 + Run `nix-prefetch-git` to get its info
 + Adding a new record to `metadata.json`
 + Update the vendorHash.
 
-The `--rev` args could pass in with:
+The `--rev` args could pass in with any sha1 or references:
 
-+ revision hash
-+ refs/heads/
++ revision sha1 hash
++ refs/heads/<branch>
 + refs/tags/v0.0.0
 
 Workflow for updating release and unstable:

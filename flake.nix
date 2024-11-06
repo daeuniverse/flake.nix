@@ -82,15 +82,14 @@
                 daed = pkgs.callPackage ./daed/package.nix { };
                 dae = self'.packages.dae-release;
               };
+
             pre-commit = {
               check.enable = true;
               settings.hooks = {
-                nixfmt = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
-                };
+                nixfmt-rfc-style.enable = true;
               };
             };
+
             devshells.default.devshell = {
               packages = [
                 inputs.nix-eval-jobs.outputs.packages.${system}.default
