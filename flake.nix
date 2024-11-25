@@ -74,6 +74,7 @@
                               owner = "daeuniverse";
                               repo = "dae";
                               inherit rev hash;
+                              fetchSubmodules = true;
                             };
                             inherit vendorHash;
                             env.VERSION = version;
