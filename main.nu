@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 def main [] {
-  print -e "commands: [sync] <PROJECT> <VERSIONS...> --rev <REVISION>"
+  print -e "commands: [sync] <PROJECT> [<VERSION>] [--rev <REVISION>]"
   print -e $'(char newline)'
   print -e "REVISION: Any sha1 or references"
   print -e "          e.g. 'refs/tags/v1.0.0' | 'refs/heads/main' | rev_hash"
@@ -38,8 +38,8 @@ def "main sync" [
   let get_vendor_hash = {|v|
     let res = nix --log-format raw build $'.#($project)-($v)' | complete;
     if ($res.exit_code == 0) {
-      log info "build success. return"
-      return
+      log info "build success. remain vendorHash unchange"
+      return;
     }
     let stderr = $res.stderr;
     let vendor_hash = $stderr | lines | find --regex "got:" | str trim | split row " " | last
@@ -126,7 +126,12 @@ def "main sync" [
 
     log info "save file for calc vendorHash"
     $metadata | save ./metadata.json -f
-    $metadata = $metadata | update $project { update $v { update vendorHash (do $get_vendor_hash $v) } };
+    let new_vendor_hash = do $get_vendor_hash $v;
+    if ($new_vendor_hash == null) {
+      log info "skip modify vendorHash"
+      return;
+    }
+    $metadata = $metadata | update $project { update $v { update vendorHash $new_vendor_hash } };
   }
 
   log info "save final file"

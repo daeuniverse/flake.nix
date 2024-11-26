@@ -3,39 +3,12 @@ on:
   pull_request:
     branches: ["*"]
   push:
-    branches: ["main"]
+    branches: ["*"]
 jobs:
   check:
     name: format check
     runs-on: ubuntu-latest
     steps: 
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-
-      - name: flake check
-        run: |
-          nix flake check
-        shell: bash
-
-  build:
-    name: build packages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-
-      - name: build dae
-        run: |
-          nix build .#packages.x86_64-linux.dae
-        shell: bash
-
-      - name: build daed
-        run: |
-          nix build .#packages.x86_64-linux.daed
-        shell: bash
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/flake-checker-action@main

@@ -3,30 +3,37 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nix-eval-jobs = {
-      url = "github:nix-community/nix-eval-jobs";
-    };
-    devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   outputs =
     inputs@{
       flake-parts,
-      pre-commit-hooks,
-      devshell,
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } (
       { withSystem, ... }:
       {
+        partitionedAttrs = {
+          checks = "dev";
+          devShells = "dev";
+        };
+        partitions = {
+          dev.extraInputsFlake = ./dev;
+          dev.module =
+            { inputs, ... }:
+            {
+              imports = [
+                inputs.pre-commit-hooks.flakeModule
+                ./dev/pre-commit-hook.nix
+                inputs.devshell.flakeModule
+                ./dev/devshell.nix
+              ];
+            };
+        };
         imports = [
-          pre-commit-hooks.flakeModule
-          devshell.flakeModule
+          flake-parts.flakeModules.partitions
+          flake-parts.flakeModules.easyOverlay
         ];
         systems = [
           "x86_64-linux"
@@ -37,11 +44,14 @@
             self',
             pkgs,
             system,
+            config,
             lib,
             ...
           }:
           {
             _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+
+            overlayAttrs = config.packages;
 
             packages =
               let
@@ -68,6 +78,7 @@
                               owner = "daeuniverse";
                               repo = "dae";
                               inherit rev hash;
+                              fetchSubmodules = true;
                             };
                             inherit vendorHash;
                             env.VERSION = version;
@@ -82,22 +93,7 @@
                 daed = pkgs.callPackage ./daed/package.nix { };
                 dae = self'.packages.dae-release;
               };
-            pre-commit = {
-              check.enable = true;
-              settings.hooks = {
-                nixfmt = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
-                };
-              };
-            };
-            devshells.default.devshell = {
-              packages = [
-                inputs.nix-eval-jobs.outputs.packages.${system}.default
-                pkgs.cachix
-                pkgs.nushell
-              ];
-            };
+
             formatter = pkgs.nixfmt-rfc-style;
           };
         flake =
@@ -117,23 +113,9 @@
                     );
                   };
               };
-              overlays = {
-                ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
-              };
             };
           in
-          inputs.nixpkgs.lib.mkMerge (
-            (map genFlake moduleName)
-            ++ [
-              {
-                overlays.default =
-                  final: prev:
-                  inputs.nixpkgs.lib.genAttrs moduleName (n: {
-                    ${n} = inputs.self.packages.${n};
-                  });
-              }
-            ]
-          );
+          inputs.nixpkgs.lib.mkMerge (map genFlake moduleName);
       }
     );
 }

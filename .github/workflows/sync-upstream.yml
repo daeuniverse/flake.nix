@@ -30,92 +30,23 @@ jobs:
       - uses: actions/checkout@main
         with:
           token: ${{ steps.generate_token.outputs.token }}
-          ref: ${{ inputs.branch }}
 
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
-
-      - name: Get the latest upstream commit
-        id: upstream_commit
-        shell: bash
+      - name: Update package
         run: |
-          #!/usr/bin/env bash
-          set -exuo pipefail
-          out=$(nix run nixpkgs#nix-prefetch-git -- --url 'https://github.com/${{ github.repository_owner }}/${{ inputs.project }}.git' --rev 'refs/heads/main' --fetch-submodules --quiet | tee output.json)
-          echo sha_short=$(echo $out | jq -r '.rev' | cut -c1-7) >> "$GITHUB_OUTPUT"
-
-      - name: Update metadata for a project based off the latest upstream git commit
-        id: update_metadata
-        shell: bash
-        run: |
-          #!/usr/bin/env bash
-          set -exo pipefail
-          
-          # Convert the output from previous step to valid JSON format
-          project=${{ inputs.project }}
-          json_output=$(cat output.json)
-          
-          # Extract the necessary values from the json_output
-          date=$(echo "$json_output" | jq -r '.date' | awk -F'T' '{print $1}')
-          rev=$(echo "$json_output" | jq -r '.rev')
-          rev_short=$(echo "$json_output" | jq -r '.rev' | cut -c1-7)
-          hash=$(echo "$json_output" | jq -r '.hash')
-          
-          # Update the metadata.json file
-          jq --arg version "unstable-$date.$rev_short" \
-            --arg rev "$rev" \
-            --arg hash "$hash" \
-            '.version = $version | .rev = $rev | .hash = $hash' \
-            ./$project/metadata.json | tee ./$project/metadata.json.tmp
-          mv ./$project/{metadata.json.tmp,metadata.json}
-          
-          # Retry logic for awk extraction
-          max_retries=3
-          retry_count=0
-          vendor=
-          until [ "$retry_count" -ge "$max_retries" ]; do
-            vendor="$(nix --log-format raw build .#$project 2>&1 | grep "got: " | awk '/got: / {print $NF}' || echo '')"
-            vendor_fetch_status=$?
-            if [ -n "$vendor" ]; then
-              # If $vendor is not empty, extraction succeeded
-              vendor_fetch_status=0
-              break
-            fi
-            retry_count=$((retry_count + 1))
-            echo "Retrying nix command and awk extraction ($retry_count/$max_retries)..."
-            sleep 3
-          done
-          if [ "$vendor_fetch_status" -ne 0 ]; then
-            echo "nix command failed with status $vendor_fetch_status."
-            echo "awk extraction failed after $max_retries attempts."
-            exit 1
-          fi
-
-          if [ -z "$vendor" ]; then
-            # if $vendor is empty
-            # use original vendorHash
-            vendor="$(jq -r '.vendorHash' $project/metadata.json)"
-          fi
-
-          # Continue with script execution using $vendor
-          echo "Vendor extraction succeeded: $vendor"
-
-          # Update vendorHash in metadata.json
-          jq --arg vendor "$vendor" \
-            '.vendorHash = $vendor' \
-            ./$project/metadata.json | tee ./$project/metadata.json.tmp
-          mv ./$project/{metadata.json.tmp,metadata.json}
-
+          nix develop -c ./main.nu sync ${{ inputs.project }} ${{ inputs.branch }}
+        
       - name: Commit changes and push
         uses: EndBug/add-and-commit@main
         with:
-          add: "${{ inputs.project }}/metadata.json"
+          add: "metadata.json"
           commit: --signoff
-          message: "chore(${{ inputs.project }}): pin ref to refs/head/main (${{ steps.upstream_commit.outputs.sha_short }})"
+          message: "chore(${{ inputs.project }}): sync to refs/head/main"
 
       - name: Build
         run: |
           #!/usr/bin/env bash
           set -exuo pipefail
-          nix build .#${{ inputs.project }}
+          nix build .#${{ inputs.project }}-${{ inputs.branch }}
