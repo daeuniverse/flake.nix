@@ -23,81 +23,83 @@
     }:
     flake-parts.lib.mkFlake { inherit inputs; } (
       { withSystem, ... }:
-      {
-        imports = [
-          pre-commit-hooks.flakeModule
-          devshell.flakeModule
-        ];
-        systems = [
-          "x86_64-linux"
-          "aarch64-linux"
-        ];
-        perSystem =
-          {
-            pkgs,
-            system,
-            lib,
-            ...
-          }:
-          {
-            _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+      inputs.nixpkgs.lib.warn
+        "[31mdaeuniverse/flake.nix: This branch is deprecated, it will be removed in the future. Please use package `dae-unstable` on `main` branch instead. See <https://github.com/daeuniverse/flake.nix/pull/124>[0m"
+        {
+          imports = [
+            pre-commit-hooks.flakeModule
+            devshell.flakeModule
+          ];
+          systems = [
+            "x86_64-linux"
+            "aarch64-linux"
+          ];
+          perSystem =
+            {
+              pkgs,
+              system,
+              lib,
+              ...
+            }:
+            {
+              _module.args.pkgs = import inputs.nixpkgs { inherit system; };
 
-            packages = {
-              dae = pkgs.callPackage ./dae/package.nix { };
-              daed = pkgs.callPackage ./daed/package.nix { };
-            };
-            pre-commit = {
-              check.enable = true;
-              settings.hooks = {
-                nixfmt = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+              packages = {
+                dae = pkgs.callPackage ./dae/package.nix { };
+                daed = pkgs.callPackage ./daed/package.nix { };
+              };
+              pre-commit = {
+                check.enable = true;
+                settings.hooks = {
+                  nixfmt = {
+                    enable = true;
+                    entry = lib.mkForce "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+                  };
                 };
               };
+              devshells.default.devshell = {
+                packages = [
+                  inputs.nix-eval-jobs.outputs.packages.${system}.default
+                  pkgs.cachix
+                  pkgs.nushell
+                ];
+              };
+              formatter = pkgs.nixfmt-rfc-style;
             };
-            devshells.default.devshell = {
-              packages = [
-                inputs.nix-eval-jobs.outputs.packages.${system}.default
-                pkgs.cachix
-                pkgs.nushell
+          flake =
+            let
+              moduleName = [
+                "dae"
+                "daed"
               ];
-            };
-            formatter = pkgs.nixfmt-rfc-style;
-          };
-        flake =
-          let
-            moduleName = [
-              "dae"
-              "daed"
-            ];
-            genFlake = n: {
-              nixosModules = {
-                ${n} =
-                  { pkgs, ... }:
-                  {
-                    imports = [ ./${n}/module.nix ];
-                    services.${n}.package = withSystem pkgs.stdenv.hostPlatform.system (
-                      { config, ... }: config.packages.${n}
-                    );
-                  };
+              genFlake = n: {
+                nixosModules = {
+                  ${n} =
+                    { pkgs, ... }:
+                    {
+                      imports = [ ./${n}/module.nix ];
+                      services.${n}.package = withSystem pkgs.stdenv.hostPlatform.system (
+                        { config, ... }: config.packages.${n}
+                      );
+                    };
+                };
+                overlays = {
+                  ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
+                };
               };
-              overlays = {
-                ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
-              };
-            };
-          in
-          inputs.nixpkgs.lib.mkMerge (
-            (map genFlake moduleName)
-            ++ [
-              {
-                overlays.default =
-                  final: prev:
-                  inputs.nixpkgs.lib.genAttrs moduleName (n: {
-                    ${n} = inputs.self.packages.${n};
-                  });
-              }
-            ]
-          );
-      }
+            in
+            inputs.nixpkgs.lib.mkMerge (
+              (map genFlake moduleName)
+              ++ [
+                {
+                  overlays.default =
+                    final: prev:
+                    inputs.nixpkgs.lib.genAttrs moduleName (n: {
+                      ${n} = inputs.self.packages.${n};
+                    });
+                }
+              ]
+            );
+        }
     );
 }
