@@ -33,6 +33,7 @@
         };
         imports = [
           flake-parts.flakeModules.partitions
+          flake-parts.flakeModules.easyOverlay
         ];
         systems = [
           "x86_64-linux"
@@ -43,11 +44,14 @@
             self',
             pkgs,
             system,
+            config,
             lib,
             ...
           }:
           {
             _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+
+            overlayAttrs = config.packages;
 
             packages =
               let
@@ -109,23 +113,9 @@
                     );
                   };
               };
-              overlays = {
-                ${n} = final: prev: { ${n} = inputs.self.packages.${n}; };
-              };
             };
           in
-          inputs.nixpkgs.lib.mkMerge (
-            (map genFlake moduleName)
-            ++ [
-              {
-                overlays.default =
-                  final: prev:
-                  inputs.nixpkgs.lib.genAttrs moduleName (n: {
-                    ${n} = inputs.self.packages.${n};
-                  });
-              }
-            ]
-          );
+          inputs.nixpkgs.lib.mkMerge (map genFlake moduleName);
       }
     );
 }
