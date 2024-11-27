@@ -27,6 +27,7 @@
 
 2. Enable dae or daed module.
 
+> [!NOTE]
 > To see full options, check `dae{,d}/module.nix`.
 
 ```nix
@@ -100,6 +101,13 @@ See details with `nix flake show github:daeuniverse/flake.nix`
       [ dae daed ]; # or dae-unstable dae-experient
 }
 ```
+
+> [!WARNING]
+> This Nix Flake provides two installation methods for the dae package:
+> - NixOS Modules via the services.dae service.
+> - Global System Package via environment.systemPackages.
+> 
+> **Important**: Do NOT enable both installation methods simultaneously, as this will result in incompatible binary version issues. Please choose one method to avoid conflicts.
 
 ## Package Options
 
