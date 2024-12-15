@@ -1,3 +1,4 @@
+{ withSystem }:
 {
   config,
   lib,
@@ -16,7 +17,7 @@ let
     ;
 
   cfg = config.services.dae;
-  assets = cfg.assets;
+  inherit (cfg) assets;
   genAssetsDrv =
     paths:
     pkgs.symlinkJoin {
@@ -32,7 +33,10 @@ in
     services.dae = {
       enable = mkEnableOption "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
-      package = mkOption { defaultText = lib.literalMD "`packages.dae` from this flake"; };
+      package = mkOption {
+        default = withSystem ({ config, ... }: config.packages.dae);
+        defaultText = lib.literalMD "`packages.dae` from this flake";
+      };
 
       assets = mkOption {
         type = with types; (listOf path);
