@@ -1,3 +1,4 @@
+{ withSystem }:
 {
   config,
   pkgs,
@@ -23,7 +24,10 @@ in
     services.daed = {
       enable = mkEnableOption "A modern dashboard for dae";
 
-      package = mkOption { defaultText = lib.literalMD "`packages.daed` from this flake"; };
+      package = mkOption {
+        default = withSystem ({ config, ... }: config.packages.daed);
+        defaultText = lib.literalMD "`packages.daed` from this flake";
+      };
 
       configDir = mkOption {
         type = types.str;

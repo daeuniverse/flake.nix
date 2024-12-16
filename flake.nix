@@ -12,7 +12,7 @@
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } (
-      { withSystem, ... }:
+      { flake-parts-lib, withSystem, ... }:
       {
         partitionedAttrs = {
           checks = "dev";
@@ -55,7 +55,7 @@
 
             packages =
               let
-                metadata = (builtins.fromJSON (builtins.readFile ./metadata.json));
+                metadata = builtins.fromJSON (builtins.readFile ./metadata.json);
               in
               # dae subspecies
               (
@@ -87,7 +87,7 @@
                     };
                   daeVers = builtins.attrNames metadata.dae;
                 in
-                lib.listToAttrs (lib.map (v: lib.nameValuePair "dae-${v}" (daeBorn (metadata.dae.${v}))) daeVers)
+                lib.listToAttrs (lib.map (v: lib.nameValuePair "dae-${v}" (daeBorn metadata.dae.${v})) daeVers)
               )
               // {
                 daed = pkgs.callPackage ./daed/package.nix { };
@@ -103,15 +103,8 @@
               "daed"
             ];
             genFlake = n: {
-              nixosModules = {
-                ${n} =
-                  { pkgs, ... }:
-                  {
-                    imports = [ ./${n}/module.nix ];
-                    services.${n}.package = withSystem pkgs.stdenv.hostPlatform.system (
-                      { config, ... }: config.packages.${n}
-                    );
-                  };
+              nixosModules.${n} = flake-parts-lib.importApply ./${n}/module.nix {
+                inherit withSystem;
               };
             };
           in
