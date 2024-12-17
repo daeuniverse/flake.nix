@@ -25,7 +25,7 @@ in
       enable = mkEnableOption "A modern dashboard for dae";
 
       package = mkOption {
-        default = withSystem ({ config, ... }: config.packages.daed);
+        default = withSystem pkgs.system ({ config, ... }: config.packages.daed);
         defaultText = lib.literalMD "`packages.daed` from this flake";
       };
 

@@ -34,7 +34,7 @@ in
       enable = mkEnableOption "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
       package = mkOption {
-        default = withSystem ({ config, ... }: config.packages.dae);
+        default = withSystem pkgs.system ({ config, ... }: config.packages.dae);
         defaultText = lib.literalMD "`packages.dae` from this flake";
       };
 
