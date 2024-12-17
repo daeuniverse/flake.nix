@@ -14,6 +14,7 @@ let
     types
     optional
     getExe
+    mkPackageOption
     ;
 
   cfg = config.services.dae;
@@ -33,9 +34,8 @@ in
     services.dae = {
       enable = mkEnableOption "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
-      package = mkOption {
-        default = withSystem pkgs.system ({ config, ... }: config.packages.dae);
-        defaultText = lib.literalMD "`packages.dae` from this flake";
+      package = mkPackageOption (withSystem pkgs.system ({ config, ... }: config.packages)) "dae" {
+        pkgsText = "flake.packages.$\{pkgs.system}.dae";
       };
 
       assets = mkOption {

@@ -12,6 +12,7 @@ let
     mkOption
     literalExpression
     types
+    mkPackageOption
     ;
 
   cfg = config.services.daed;
@@ -24,9 +25,8 @@ in
     services.daed = {
       enable = mkEnableOption "A modern dashboard for dae";
 
-      package = mkOption {
-        default = withSystem pkgs.system ({ config, ... }: config.packages.daed);
-        defaultText = lib.literalMD "`packages.daed` from this flake";
+      package = mkPackageOption (withSystem pkgs.system ({ config, ... }: config.packages)) "daed" {
+        pkgsText = "flake.packages.$\{pkgs.system}.daed";
       };
 
       configDir = mkOption {
