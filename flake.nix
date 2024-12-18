@@ -28,6 +28,7 @@
                 ./dev/pre-commit-hook.nix
                 inputs.devshell.flakeModule
                 ./dev/devshell.nix
+                ./dev/test.nix
               ];
             };
         };
