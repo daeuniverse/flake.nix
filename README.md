@@ -1,6 +1,7 @@
 # flake.nix
 
-![CI state](https://github.com/daeuniverse/flake.nix/actions/workflows/lint.yaml/badge.svg)
+![LINT state](https://github.com/daeuniverse/flake.nix/actions/workflows/lint.yaml/badge.svg)
+![EVAL state](https://github.com/daeuniverse/flake.nix/actions/workflows/eval.yaml/badge.svg)
 [![built with garnix](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fdaeuniverse%2Fflake.nix%3Fbranch%3Dmain)](https://garnix.io)
 
 ## Use with flake

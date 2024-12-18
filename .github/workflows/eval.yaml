@@ -1,0 +1,22 @@
+name: Eval
+on:
+  pull_request:
+    branches: ["*"]
+  push:
+    branches: ["main", "dev"]
+jobs:
+  check:
+    name: Check Flake
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+  lint:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: |
+          nix flake check -v
