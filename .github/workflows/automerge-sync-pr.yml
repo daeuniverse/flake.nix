@@ -1,12 +1,12 @@
-name: Auto merge changes made to the target branches in a pull request
+name: Auto merge upstream changes made in a PR to the main branch
 
 on:
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: Pull request number
-        required: true
-        type: string
+  workflow_run:
+    workflows:
+      - Eval
+      - Lint
+    types:
+      - completed
 
 jobs:
   sync-changes:
@@ -15,6 +15,11 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Get Pull Request Number
+        id: get_pr_number
+        run: |
+          echo "PR_NUMBER=$(jq -r '.workflow_run.pull_requests[0].number' "$GITHUB_EVENT_PATH")" >> $GITHUB_ENV
+          
       - name: Generate GitHub Auth Token
         # https://github.com/tibdex/github-app-token
         id: generate_token
@@ -22,7 +27,7 @@ jobs:
         with:
           app_id: ${{ secrets.GH_APP_ID }}
           private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-
+          
       - name: Auto merge changes in the target PR
         id: automerge
         # https://github.com/pascalgn/automerge-action
@@ -32,7 +37,7 @@ jobs:
           MERGE_LABELS: automerge
           MERGE_REMOVE_LABELS: automerge
           MERGE_METHOD: squash
-          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge ${{ inputs.pr_number }}"
+          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge #${{ env.PR_NUMBER }}"
           MERGE_FORKS: false
           MERGE_RETRIES: 0
           MERGE_RETRY_SLEEP: 0
