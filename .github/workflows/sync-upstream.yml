@@ -10,6 +10,8 @@ on:
           - dae
           - daed
         required: true
+      # the `branch` represented package name suffix.
+      # e.g. dae-unstable, dae-release, ...
       branch:
         type: string
         description: branch to sync with
@@ -38,12 +40,36 @@ jobs:
         run: |
           nix develop -c ./main.nu sync ${{ inputs.project }} ${{ inputs.branch }}
         
-      - name: Commit changes and push
+      - name: Commit changes
         uses: EndBug/add-and-commit@main
         with:
           add: "metadata.json"
           commit: --signoff
           message: "chore(${{ inputs.project }}): sync to refs/head/main"
+          push: false
+
+      - name: Push to sync-target
+        run: |
+          git checkout -b sync-target
+          git push origin sync-target
+
+      - name: Create Pull Request
+        uses: actions/github-script@main
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          script: |
+            const { data: pull_request } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore(${project}): sync to refs/head/main`,
+              body: `This PR merges the \`${project}-${branch}\` latest update from upstream.`,
+              head: 'sync-target',
+              base: 'main',
+            });
+            console.log(`Created pull request ${pull_request.number}`);
+        env:
+          PROJECT: ${{ inputs.project }}
+          BRANCH: ${{ inputs.branch }}
 
       - name: Build
         run: |
