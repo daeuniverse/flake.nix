@@ -51,7 +51,7 @@ jobs:
       - name: Push to sync-target
         run: |
           git checkout -b sync-target
-          git push origin sync-target
+          git push -u origin sync-target
 
       - name: Create Pull Request
         uses: actions/github-script@main
