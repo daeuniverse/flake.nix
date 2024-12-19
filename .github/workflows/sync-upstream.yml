@@ -4,18 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       project:
-        type: string
+        type: choice
         description: upstream project name
         options:
           - dae
           - daed
         required: true
-      # the `branch` represented package name suffix.
-      # e.g. dae-unstable, dae-release, ...
-      branch:
+      suffix:
         type: string
-        description: branch to sync with
-        default: unstable
+        required: false
+        default: "unstable"
+        description: suffix of package name, e.g. unstable, release
+      revision:
+        type: string
+        required: false
+        description: revision to sync
+
 
 jobs:
   sync-upstream:
@@ -36,10 +40,27 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
-      - name: Update package
+
+      - name: Update unstable package
+        id: "update-unstable"
+        if: "${{ github.event.inputs.revision == '' && github.event.inputs.suffix == 'unstable' }}"
         run: |
-          nix develop -c ./main.nu sync ${{ inputs.project }} ${{ inputs.branch }}
+          nix develop -c ./main.nu sync ${{ inputs.project }} unstable
         
+      - name: Update package with revision
+        id: "update-with-rev"
+        # skip while revision set but suffix keeps default (unstable)
+        if: "${{ steps.update-unstable.outcome == 'skipped' && github.event.inputs.suffix != 'unstable' }}"
+        run: |
+          nix develop -c ./main.nu sync ${{ inputs.project }} ${{ inputs.suffix }} --rev ${{ inputs.revision }}
+
+      - name: Check package update step outcome
+        run: |
+          if [[ "${{ steps.update-with-rev.outcome }}" != "success" && "${{ steps.update-unstable.outcome }}" != "success" ]]; then
+            echo "Update Package Failed"
+            exit 1
+          fi
+
       - name: Commit changes
         uses: EndBug/add-and-commit@main
         with:
@@ -62,17 +83,17 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `chore(${project}): sync to refs/head/main`,
-              body: `This PR merges the \`${project}-${branch}\` latest update from upstream.`,
+              body: `This PR merges the \`${project}-${suffix}\` latest update from upstream.`,
               head: 'sync-target',
               base: 'main',
             });
             console.log(`Created pull request ${pull_request.number}`);
         env:
           PROJECT: ${{ inputs.project }}
-          BRANCH: ${{ inputs.branch }}
+          SUFFIX: ${{ inputs.suffix }}
 
       - name: Build
         run: |
           #!/usr/bin/env bash
           set -exuo pipefail
-          nix build .#${{ inputs.project }}-${{ inputs.branch }}
+          nix build .#${{ inputs.project }}-${{ inputs.suffix }}
