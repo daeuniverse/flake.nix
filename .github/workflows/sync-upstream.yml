@@ -79,6 +79,8 @@ jobs:
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
           script: |
+            const project = process.env.PROJECT;
+            const suffix = process.env.SUFFIX;
             const { data: pull_request } = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
