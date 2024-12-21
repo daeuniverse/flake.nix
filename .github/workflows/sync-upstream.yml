@@ -79,11 +79,12 @@ jobs:
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
           script: |
+            const { project, suffix, revision } = process.env
             const { data: pull_request } = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `chore(${project}): sync to refs/head/main`,
-              body: `This PR merges the \`${project}-${suffix}\` latest update from upstream.`,
+              title: `chore(${project}): sync to ${revision || "refs/head/main"}`,
+              body: `This PR merges the ${project}-${suffix} latest update from upstream.`,
               head: 'sync-target',
               base: 'main',
             });
