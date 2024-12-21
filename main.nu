@@ -136,4 +136,5 @@ def "main sync" [
 
   log info "save final file"
   $metadata | save ./metadata.json -f
+  cat ./metadata.json
 }
