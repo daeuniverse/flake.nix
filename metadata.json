@@ -1,10 +1,10 @@
 {
   "dae": {
     "release": {
-      "version": "v0.8.0",
-      "rev": "v0.8.0",
-      "hash": "sha256-Vdh5acE5i/bJ8VXOm+9OqZQbxvqv4TS/t0DDfBs/K5g=",
-      "vendorHash": "sha256-0Q+1cXUu4EH4qkGlK6BIpv4dCdtSKjb1RbLi5Xfjcew="
+      "version": "v0.9.0",
+      "rev": "v0.9.0",
+      "hash": "sha256-yW3GDflTd9I4RreWtLQE92aP7BnswJHx44jmTZ81kP8=",
+      "vendorHash": "sha256-nThkNyH6TUcFej9IGJ/jME0dGK517d5vJueNU7x86o8="
     },
     "unstable": {
       "version": "unstable-2024-11-25.6039b25",
