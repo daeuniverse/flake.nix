@@ -74,16 +74,23 @@ jobs:
           git checkout -b sync-target
           git push -u origin sync-target
 
+      - name: Build
+        run: |
+          #!/usr/bin/env bash
+          set -exuo pipefail
+          nix build .#${{ inputs.project }}-${{ inputs.suffix }}
+
       - name: Create Pull Request
         uses: actions/github-script@main
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
           script: |
+            const { PROJECT, SUFFIX, REVISION } = process.env
             const { data: pull_request } = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `chore(${project}): sync to refs/head/main`,
-              body: `This PR merges the \`${project}-${suffix}\` latest update from upstream.`,
+              title: `chore(${PROJECT}): sync to ${REVISION || "refs/head/main"}`,
+              body: `This PR merges the ${PROJECT}-${SUFFIX} latest update from upstream.`,
               head: 'sync-target',
               base: 'main',
             });
@@ -91,9 +98,4 @@ jobs:
         env:
           PROJECT: ${{ inputs.project }}
           SUFFIX: ${{ inputs.suffix }}
-
-      - name: Build
-        run: |
-          #!/usr/bin/env bash
-          set -exuo pipefail
-          nix build .#${{ inputs.project }}-${{ inputs.suffix }}
+          REVISION: ${{ inputs.revision }}
