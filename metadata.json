@@ -7,9 +7,9 @@
       "vendorHash": "sha256-nThkNyH6TUcFej9IGJ/jME0dGK517d5vJueNU7x86o8="
     },
     "unstable": {
-      "version": "unstable-2024-12-27.8693f52",
-      "rev": "8693f5249275a7eeb73194d176c6d438705a24bc",
-      "hash": "sha256-KfqfMBBYYxUxoEYvxKvPlp7tognQDXDs8JidrdpwB+g=",
+      "version": "unstable-2024-12-29.046dab6",
+      "rev": "046dab62cbd4a123ca5bfa4cc3d06ac4f3923be6",
+      "hash": "sha256-0oCVXNNbOsPVppuZn9jg0DEiRcmNrVf2s38v8kOfJnE=",
       "vendorHash": "sha256-nThkNyH6TUcFej9IGJ/jME0dGK517d5vJueNU7x86o8="
     }
   }
