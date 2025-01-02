@@ -139,7 +139,7 @@ About **adding a new version**, if the `VERSION` you provided doesn't match any 
 The `--rev` args could pass in with any sha1 or references:
 
 + revision sha1 hash
-+ refs/heads/<branch>
++ refs/heads/\<branch>
 + refs/tags/v0.0.0
 
 Workflow for updating release and unstable:
