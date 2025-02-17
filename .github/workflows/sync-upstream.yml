@@ -66,7 +66,7 @@ jobs:
         with:
           add: "metadata.json"
           commit: --signoff
-          message: "chore(${{ inputs.project }}): sync to refs/head/main"
+          message: "chore(${{ inputs.project }}): sync ${{ inputs.suffix }}"
           push: false
 
       - name: Push to sync-target
