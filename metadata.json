@@ -17,6 +17,12 @@
       "rev": "278d6da8baae10a0bb3bb3aa00585779683394ab",
       "hash": "sha256-s5ieZWH/Fg7KlFtwQWlpWnc9V3WwJwRJU8alik7wt1U=",
       "vendorHash": "sha256-gY6NiMrhbxOmZWCk3GzO6MNQlKbhwjKXWjbVOewIiFc="
+    },
+    "748-1": {
+      "version": "unstable-2025-02-18.c4846bc",
+      "rev": "c4846bc62f4ca40c8df4cc2fd5a7f552692622cf",
+      "hash": "sha256-KmVCTKGHkaEDEDH8zUd5E0DcVYOHVph+qT+y76neZFs=",
+      "vendorHash": "sha256-0n2VolcwT+SWry8VsRz2RTeGF0dLCgyY+FbCHMFAoW8="
     }
   }
 }
