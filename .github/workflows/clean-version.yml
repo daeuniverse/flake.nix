@@ -32,7 +32,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flakehub-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
 
         
