@@ -1,0 +1,73 @@
+name: Clean package version
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        type: choice
+        description: upstream project name
+        options:
+          - dae
+          - daed
+        required: true
+      suffix:
+        type: string
+        required: true
+        description: suffix of package name to clean, e.g. unstable, release
+
+jobs:
+  clean-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub auth token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@main
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+
+        
+      - name: Clean package
+        run: |
+          nix develop -c nu -c "open metadata.json | update ${{ inputs.project }} { $in | get ${{ inputs.project }} | reject ${{ inputs.suffix }} } | save -f metadata.json"
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@main
+        with:
+          add: "metadata.json"
+          commit: --signoff
+          message: "chore(${{ inputs.project }}): clean version ${{ inputs.suffix }}"
+          push: false
+
+      - name: Push to clean-version
+        run: |
+          git checkout -b clean-version
+          git push -u origin clean-version
+
+      - name: Create Pull Request
+        uses: actions/github-script@main
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          script: |
+            const { PROJECT, SUFFIX, REVISION } = process.env
+            const { data: pull_request } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore(${PROJECT}): clean version ${SUFFIX}`,
+              body: `This PR merges the ${PROJECT}-${SUFFIX} latest update from upstream.`,
+              head: 'clean-version',
+              base: 'main',
+            });
+            console.log(`Created pull request ${pull_request.number}`);
+        env:
+          PROJECT: ${{ inputs.project }}
+          SUFFIX: ${{ inputs.suffix }}
