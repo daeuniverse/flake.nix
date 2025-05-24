@@ -103,7 +103,7 @@ def "main sync" [
           log error "syncing new version must specify only one. exiting"
           return
         }
-        if ($v in $metadata) { 
+        if ($v in ($metadata | get $project)) {
           log error "version already exist. skip"
           continue
         }
@@ -136,4 +136,5 @@ def "main sync" [
 
   log info "save final file"
   $metadata | save ./metadata.json -f
+  cat ./metadata.json
 }

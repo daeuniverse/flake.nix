@@ -103,7 +103,7 @@ jobs:
             });
 
             core.setOutput('pr_number', pull_request.number)
-            
+
             console.log(`Created pull request ${pull_request.number}`);
         env:
           PROJECT: ${{ inputs.project }}

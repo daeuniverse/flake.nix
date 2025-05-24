@@ -95,16 +95,18 @@ in
           let
             inherit (types) nullOr addCheck str;
             isAbsolutePathString = x: lib.substring 0 1 x == "/";
+            isNotInStore = x: !lib.hasPrefix builtins.storeDir x;
+            combineTopic = x: isAbsolutePathString x && isNotInStore x;
           in
-          (nullOr (addCheck str isAbsolutePathString))
+          (nullOr (addCheck str combineTopic))
           // {
-            description = "${types.str.description} (with check: is absolute path string)";
+            description = "${types.str.description} (with check: should be absolute path **string** which not a store path)";
           };
         default = null;
         example = ''"/path/to/your/config.dae"'';
         description = ''
-          The absolute path string of dae config file, end with `.dae`.
-          Will fallback to `"/etc/dae/config.dae"` if this is not set.
+          The absolute path string of dae config file which not in nix store,
+          end with `.dae`. Will fallback to `"/etc/dae/config.dae"` if this is not set.
         '';
       };
 
