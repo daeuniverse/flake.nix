@@ -2,11 +2,11 @@ name: Auto merge sync PR
 
 on:
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: Pull request number
-        required: true
-        type: string
+  pull_request:
+    types: [ opened ]
+    paths:
+      - ".github/workflows/automerge-sync-pr.yml"
+      - "metadata.json"
 
 jobs:
   sync-changes:
@@ -29,13 +29,12 @@ jobs:
         uses: pascalgn/automerge-action@main
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-          MERGE_LABELS: automerge
-          MERGE_REMOVE_LABELS: automerge
-          MERGE_METHOD: squash
+          MERGE_LABELS: "sync-upstream:auto,automated-pr,automerge"
+          UPDATE_LABELS: "automerge"
+          MERGE_METHOD: "squash"
           MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge #${{ inputs.pr_number }}"
           MERGE_FORKS: false
           MERGE_RETRIES: 0
           MERGE_RETRY_SLEEP: 0
           MERGE_REQUIRED_APPROVALS: 0
-          BASE_BRANCHES: "unstable,experiment"
-          PULL_REQUEST: ${{ inputs.pr_number }}
+          BASE_BRANCHES: "main"
