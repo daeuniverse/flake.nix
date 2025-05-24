@@ -2,11 +2,11 @@ name: Auto merge sync PR
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [ opened ]
-    paths:
-      - ".github/workflows/automerge-sync-pr.yml"
-      - "metadata.json"
+    inputs:
+      pr_number:
+        description: Pull request number
+        required: true
+        type: string
 
 jobs:
   sync-changes:
@@ -38,3 +38,4 @@ jobs:
           MERGE_RETRY_SLEEP: 0
           MERGE_REQUIRED_APPROVALS: 0
           BASE_BRANCHES: "main"
+          PULL_REQUEST: ${{ inputs.pr_number }}
