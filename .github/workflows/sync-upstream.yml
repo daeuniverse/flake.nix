@@ -94,8 +94,31 @@ jobs:
               head: 'sync-target',
               base: 'main',
             });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pull_request.number,
+              labels: ['automated-pr', 'automerge', 'sync-upstream:auto']
+            });
+
+            core.setOutput('pr_number', pull_request.number)
+
             console.log(`Created pull request ${pull_request.number}`);
         env:
           PROJECT: ${{ inputs.project }}
           SUFFIX: ${{ inputs.suffix }}
           REVISION: ${{ inputs.revision }}
+
+      - name: Dispatch Automerge Sync-PR Workflow
+        uses: convictional/trigger-workflow-and-wait@v1.6.5
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ env.DOWNSTREAM_REPO }}
+          github_token: ${{ steps.generate_token.outputs.token }}
+          workflow_file_name: ${{ env.WORKFLOW_FILE }}
+          ref: main
+          client_payload: '{"pr_number":"${{ steps.create_pr.outputs.pr_number }}"}'
+          trigger_workflow: true
+          propagate_failure: false
+          wait_workflow: false
