@@ -23,7 +23,8 @@ jobs:
           app_id: ${{ secrets.GH_APP_ID }}
           private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - uses: ekeel/approval-action@v1.0.0
+      - name: Auto approve PR
+        uses: ekeel/approval-action@v1.0.3
         with:
           # https://github.com/marketplace/actions/approval-action
           token: ${{ steps.generate_token.outputs.token }}
