@@ -19,7 +19,9 @@ on:
         type: string
         required: false
         description: revision to sync
-
+        
+env:
+  WORKFLOW_FILE: automerge-sync-pr.yml
 
 jobs:
   sync-upstream:
@@ -114,7 +116,6 @@ jobs:
         uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
           owner: ${{ github.repository_owner }}
-          repo: ${{ env.DOWNSTREAM_REPO }}
           github_token: ${{ steps.generate_token.outputs.token }}
           workflow_file_name: ${{ env.WORKFLOW_FILE }}
           ref: main
