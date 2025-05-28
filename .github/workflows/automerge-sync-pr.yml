@@ -24,12 +24,11 @@ jobs:
           private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
       - name: Auto approve PR
-        uses: ekeel/approval-action@v1.0.3
+        uses: hmarr/auto-approve-action@v4
         with:
-          # https://github.com/marketplace/actions/approval-action
-          token: ${{ steps.generate_token.outputs.token }}
-          approvers: 'dae-prow[bot]'
-          minimumApprovals: '1'
+          # https://github.com/hmarr/auto-approve-action
+          github-token: ${{ steps.generate_token.outputs.token }}
+          pull-request-number: ${{ inputs.pr_number }}
 
       - name: Auto merge changes in the target PR
         id: automerge
