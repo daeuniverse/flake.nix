@@ -23,6 +23,13 @@ jobs:
           app_id: ${{ secrets.GH_APP_ID }}
           private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
+      - uses: ekeel/approval-action@v1.0.0
+        with:
+          # https://github.com/marketplace/actions/approval-action
+          token: ${{ steps.generate_token.outputs.token }}
+          approvers: 'dae-prow[bot]'
+          minimumApprovals: '1'
+
       - name: Auto merge changes in the target PR
         id: automerge
         # https://github.com/pascalgn/automerge-action
