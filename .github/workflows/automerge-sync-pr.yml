@@ -27,7 +27,7 @@ jobs:
         uses: hmarr/auto-approve-action@v4
         with:
           # https://github.com/hmarr/auto-approve-action
-          github-token: ${{ steps.generate_token.outputs.token }}
+          pull-request-number: ${{ inputs.pr_number }}
 
       - name: Auto merge changes in the target PR
         id: automerge
