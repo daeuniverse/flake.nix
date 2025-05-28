@@ -44,4 +44,5 @@ jobs:
           MERGE_RETRY_SLEEP: 0
           MERGE_REQUIRED_APPROVALS: 0
           BASE_BRANCHES: "main"
+          MERGE_READY_STATE: "clean"
           PULL_REQUEST: ${{ inputs.pr_number }}
