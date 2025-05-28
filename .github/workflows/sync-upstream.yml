@@ -101,7 +101,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pull_request.number,
-              labels: ['automated-pr', 'automerge', 'sync-upstream:auto']
+              labels: ['chore', 'automated-pr', 'automerge', 'sync-upstream:auto']
             });
 
             core.setOutput('pr_number', pull_request.number)
