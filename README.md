@@ -191,7 +191,7 @@ just version {project}
 # e.g. just version dae
 ```
 
-Or you may verify the build result using the `nix` command:
+Or you may verify the build result directly with the binary:
 
 ```bash
 ./result/bin/{{ pkg }} --version
