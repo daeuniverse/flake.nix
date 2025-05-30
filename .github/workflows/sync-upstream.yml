@@ -116,6 +116,7 @@ jobs:
         uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
           owner: ${{ github.repository_owner }}
+          repo: flake.nix
           github_token: ${{ steps.generate_token.outputs.token }}
           workflow_file_name: ${{ env.WORKFLOW_FILE }}
           ref: main
