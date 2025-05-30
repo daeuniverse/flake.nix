@@ -56,7 +56,6 @@ update-metadata project:
     # Replace the original file
     mv ./{{ project }}/{metadata.json.tmp,metadata.json}
 
-
 # stage all files
 add:
   @git add .
