@@ -83,6 +83,7 @@ jobs:
           nix build .#${{ inputs.project }}-${{ inputs.suffix }}
 
       - name: Create Pull Request
+        id: create_pr
         uses: actions/github-script@main
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
