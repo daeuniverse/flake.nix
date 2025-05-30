@@ -7,6 +7,10 @@ on:
         description: Pull request number
         required: true
         type: string
+      project:
+        description: Upstream project name
+        required: true
+        type: string
 
 jobs:
   sync-changes:
@@ -38,7 +42,7 @@ jobs:
           MERGE_LABELS: "sync-upstream:auto,automated-pr,automerge"
           UPDATE_LABELS: "automerge"
           MERGE_METHOD: "squash"
-          MERGE_COMMIT_MESSAGE: "ci(github-action): auto merge #${{ inputs.pr_number }}"
+          MERGE_COMMIT_MESSAGE: "chore(metadata/${{ inputs.project }}): sync to refs/head/main #${{ inputs.pr_number }}"
           MERGE_FORKS: false
           MERGE_RETRIES: 0
           MERGE_RETRY_SLEEP: 0
