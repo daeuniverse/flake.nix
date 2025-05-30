@@ -121,7 +121,7 @@ jobs:
           github_token: ${{ steps.generate_token.outputs.token }}
           workflow_file_name: ${{ env.WORKFLOW_FILE }}
           ref: main
-          client_payload: '{"pr_number":"${{ steps.create_pr.outputs.pr_number }}"}'
+          client_payload: '{"pr_number":"${{ steps.create_pr.outputs.pr_number }}","project":"${{ inputs.project }}"}'
           trigger_workflow: true
           propagate_failure: false
           wait_workflow: false
