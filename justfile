@@ -12,8 +12,7 @@ default:
 
 # build pkg
 build pkg:
-  @nix build .#{{ if pkg == "dae-unstable" { "dae-unstable" } else { pkg } }}
-  # @nix build .#dae-unstable
+  @nix build .#{{ pkg }}
 
 # check version
 version pkg:
