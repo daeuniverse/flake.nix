@@ -12,7 +12,8 @@ default:
 
 # build pkg
 build pkg:
-  @nix build .#{{ pkg }}
+  @nix build .#{{ if pkg == "dae-unstable" { "dae-unstable" } else { pkg } }}
+  # @nix build .#dae-unstable
 
 # check version
 version pkg:
@@ -54,7 +55,7 @@ update-metadata project:
        ./{{ project }}/metadata.json | tee ./{{ project }}/metadata.json.tmp
     # Replace the original file
     mv ./{{ project }}/{metadata.json.tmp,metadata.json}
-    
+
 
 # stage all files
 add:
