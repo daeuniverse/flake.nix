@@ -84,13 +84,12 @@
 
 ## Globally install packages
 
-
 This flake contains serval different revision of packages:
 
-+ dae (alias of dae-release)
-+ dae-release (current latest release version)
-+ dae-unstable (keep sync with dae `main` branch)
-+ dae-experiment (specific pull request for untested features)
+- dae (alias of dae-release)
+- dae-release (current latest release version)
+- dae-unstable (keep sync with dae `main` branch)
+- dae-experiment (specific pull request for untested features)
 
 See details with `nix flake show github:daeuniverse/flake.nix`
 
@@ -105,9 +104,10 @@ See details with `nix flake show github:daeuniverse/flake.nix`
 
 > [!WARNING]
 > This Nix Flake provides two installation methods for the dae package:
+>
 > - NixOS Modules via the services.dae service.
 > - Global System Package via environment.systemPackages.
-> 
+>
 > **Important**: Do NOT enable both installation methods simultaneously, as this will result in incompatible binary version issues. Please choose one method to avoid conflicts.
 
 ## Package Options
@@ -124,6 +124,7 @@ See details with `nix flake show github:daeuniverse/flake.nix`
 The `main.nu` script on top-level of this repo is able to help you update the package. See help message with `./main.nu`.
 
 The cmd args looks like:
+
 ```
 # usage
 commands: [sync] <PROJECT> [<VERSION>] [--rev <REVISION>]
@@ -131,16 +132,16 @@ commands: [sync] <PROJECT> [<VERSION>] [--rev <REVISION>]
 
 About **adding a new version**, if the `VERSION` you provided doesn't match any of `["release" "unstable"]`, it will:
 
-+ Check the `--rev` arg and read its value
-+ Run `nix-prefetch-git` to get its info
-+ Adding a new record to `metadata.json`
-+ Update the vendorHash.
+- Check the `--rev` arg and read its value
+- Run `nix-prefetch-git` to get its info
+- Adding a new record to `metadata.json`
+- Update the vendorHash.
 
 The `--rev` args could pass in with any sha1 or references:
 
-+ revision sha1 hash
-+ refs/heads/\<branch>
-+ refs/tags/v0.0.0
+- revision sha1 hash
+- refs/heads/\<branch>
+- refs/tags/v0.0.0
 
 Workflow for updating release and unstable:
 
@@ -159,6 +160,41 @@ workflow for adding a new version:
 ```
 ./main.nu sync dae sth-new --rev 'rev_hash' or refs/heads/<branch> or refs/tags/v0.0.0
 # after this will produce a new package called dae-sth-new
+```
+
+## Build the binary package locally
+
+To build the binary package locally, you can use the following command:
+
+```bash
+# Build the package of the latest release version
+just build {project}
+# e.g. just build dae
+# Build the package of the latest unstable version
+just build {project}-unstable
+# e.g. just build dae-unstable
+```
+
+Or you can use `nix build` directly:
+
+```bash
+nix build .#{project}
+# e.g. nix build .#dae
+nix build .#dae-unstable
+# e.g. nix build .#dae-unstable
+```
+
+Verify the build result:
+
+```bash
+just version {project}
+# e.g. just version dae
+```
+
+Or you may verify the build result directly with the binary:
+
+```bash
+./result/bin/{{ pkg }} --version
 ```
 
 ## Binary cache
