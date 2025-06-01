@@ -54,7 +54,6 @@ update-metadata project:
        ./{{ project }}/metadata.json | tee ./{{ project }}/metadata.json.tmp
     # Replace the original file
     mv ./{{ project }}/{metadata.json.tmp,metadata.json}
-    
 
 # stage all files
 add:
