@@ -108,12 +108,6 @@ in
           in
           {
             wantedBy = [ "multi-user.target" ];
-            after = [
-              "network-online.target"
-              "systemd-sysctl.service"
-            ];
-            wants = [ "network-online.target" ];
-
             preStart = ''
               umask 0077
               mkdir -p ${cfg.configDir}
@@ -121,14 +115,10 @@ in
                 map (n: "ln -sfn ${n} ${cfg.configDir}") cfg.assetsPaths
               )}
             '';
-            serviceConfig = {
-              Type = "simple";
-              User = "root";
-              LimitNPROC = 512;
-              LimitNOFILE = 1048576;
-              ExecStart = "${daedBin} run -c ${cfg.configDir} -l ${cfg.listen}";
-              Restart = "on-abnormal";
-            };
+            serviceConfig.ExecStart = [
+              ""
+              "${daedBin} run -c ${cfg.configDir} -l ${cfg.listen}"
+            ];
           };
       };
 }
