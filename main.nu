@@ -42,6 +42,7 @@ def "main sync" [
       return;
     }
     let stderr = $res.stderr;
+    log info $"got stderr:(char newline)($stderr)";
     let vendor_hash = $stderr | lines | find --regex "got:" | str trim | split row " " | last
     $vendor_hash
   }
