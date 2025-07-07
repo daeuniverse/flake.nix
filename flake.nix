@@ -71,7 +71,7 @@
                     pkgs.callPackage ./dae/package.nix {
                       buildGoModule =
                         args:
-                        pkgs.buildGoModule (
+                        pkgs.buildGoLatestModule (
                           args
                           // {
                             inherit version;
