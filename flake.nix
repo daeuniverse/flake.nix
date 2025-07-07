@@ -69,7 +69,7 @@
                       vendorHash,
                     }:
                     pkgs.callPackage ./dae/package.nix {
-                      buildGoModule =
+                      buildGoLatestModule =
                         args:
                         pkgs.buildGoLatestModule (
                           args
