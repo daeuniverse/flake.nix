@@ -7,10 +7,10 @@
       "vendorHash": "sha256-u2DCHmX7vRNWIQ2Ir3UrxPGduggEqoUr1rnkDfwsT0I="
     },
     "unstable": {
-      "version": "unstable-2025-07-20.635ab7e",
-      "rev": "635ab7e3db50d131ec848afec6890180035fa079",
-      "hash": "sha256-FDvfKuf0KqMlJ5CS6D+22FlqnQ1OBh1Z5x8pukP6qY4=",
-      "vendorHash": "sha256-veSLU1Yoj9WVfyKKGuDsemO0k9N8BBCTy0oJ4k/48Jk="
+      "version": "unstable-2025-07-23.358f459",
+      "rev": "358f45973d4409b4ea598f9e147e8422eb156166",
+      "hash": "sha256-xtV8C63g0FE451NE9f0iF9KEBd8IJKzyqEuEKJSk7yc=",
+      "vendorHash": "sha256-MJVmAg+xyS53295FZ5HYB4rfbWHjUFBkxIOBxqxQP3U="
     }
   }
 }
