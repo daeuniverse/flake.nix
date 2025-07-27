@@ -3,17 +3,19 @@
   clang,
   fetchFromGitHub,
   buildGoLatestModule,
+  versionCheckHook,
+  nixosTests,
 }:
 let
   metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).dae.release;
 in
-buildGoLatestModule rec {
+buildGoLatestModule (finalAttrs: {
   pname = "dae";
   inherit (metadata) version vendorHash;
 
   src = fetchFromGitHub {
     owner = "daeuniverse";
-    repo = pname;
+    repo = finalAttrs.pname;
     inherit (metadata) rev hash;
     fetchSubmodules = true;
   };
@@ -24,7 +26,7 @@ buildGoLatestModule rec {
 
   hardeningDisable = [ "zerocallusedregs" ];
 
-  env.VERSION = version;
+  env.VERSION = finalAttrs.version;
 
   buildPhase = ''
     make CFLAGS="-D__REMOVE_BPF_PRINTK -fno-stack-protector -Wno-unused-command-line-argument" \
@@ -38,8 +40,16 @@ buildGoLatestModule rec {
   postInstall = ''
     install -Dm444 install/dae.service $out/lib/systemd/system/dae.service
     substituteInPlace $out/lib/systemd/system/dae.service \
-      --replace /usr/bin/dae $out/bin/dae
+      --replace-fail "/usr/bin/dae" "$out/bin/dae"
   '';
+
+  doInstallCheck = true;
+
+  nativeInstallCheckInputs = [ versionCheckHook ];
+
+  passthru.tests = {
+    inherit (nixosTests) dae;
+  };
 
   meta = with lib; {
     description = "A Linux high-performance transparent proxy solution based on eBPF";
@@ -48,4 +58,4 @@ buildGoLatestModule rec {
     platforms = platforms.linux;
     mainProgram = "dae";
   };
-}
+})
