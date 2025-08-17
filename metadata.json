@@ -13,9 +13,9 @@
       "vendorHash": "sha256-rln2wMxzkiIQVAxV5D5XqN9wCcaSOZl/a3JWKIhBHYQ="
     },
     "next": {
-      "version": "unstable-2025-08-15.9b5b3b9",
-      "rev": "9b5b3b9bbfacd4ad3c8d9c3c1f462cbc612ec3da",
-      "hash": "sha256-NbCSynhF3UisVT2w8vtTEGIPZHK92F5vXaFmXizO0XA=",
+      "version": "unstable-2025-08-17.846cc9d",
+      "rev": "846cc9df7bfb4cf7bdebd55209877c9095c078ab",
+      "hash": "sha256-mmiERpVTQTDkVHMy8mPJGl01YbrDF2ye2WO5vC08ZM8=",
       "vendorHash": "sha256-akBcdUwL9f+fTuNRya5WSEoeXauC1m07RZyX4vOnr/8="
     }
   }
