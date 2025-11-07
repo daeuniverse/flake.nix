@@ -1,0 +1,74 @@
+name: Bump lock
+
+on:
+  workflow_dispatch:
+env:
+  WORKFLOW_FILE: automerge-sync-pr.yml
+jobs:
+  bump-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub auth token
+        # https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: tibdex/github-app-token@v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@main
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/flakehub-cache-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
+
+      - name: Update lock
+        id: "update-lock"
+        run: |
+          nix flake update --commit-lock-file
+        
+      - name: Push to bump-lock
+        run: |
+          git checkout -b bump-lock
+          git push -u origin bump-lock
+
+      - name: Create Pull Request
+        id: create_pr
+        uses: actions/github-script@main
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          script: |
+            const { data: pull_request } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore: bump flake lock`,
+              body: `This PR bumps lock.`,
+              head: 'bump-lock',
+              base: 'main',
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pull_request.number,
+              labels: ['chore', 'automated-pr', 'automerge', 'bump-lock:auto']
+            });
+
+            core.setOutput('pr_number', pull_request.number)
+
+            console.log(`Created pull request ${pull_request.number}`);
+
+      - name: Dispatch Automerge Workflow
+        uses: convictional/trigger-workflow-and-wait@v1.6.5
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: flake.nix
+          github_token: ${{ steps.generate_token.outputs.token }}
+          workflow_file_name: ${{ env.WORKFLOW_FILE }}
+          ref: main
+          client_payload: '{"pr_number":"${{ steps.create_pr.outputs.pr_number }}"}'
+          trigger_workflow: true
+          propagate_failure: false
+          wait_workflow: false
