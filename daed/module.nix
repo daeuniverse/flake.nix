@@ -16,6 +16,8 @@ let
     ;
 
   cfg = config.services.daed;
+
+  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   # disables Nixpkgs daed module to avoid conflicts
@@ -25,7 +27,7 @@ in
     services.daed = {
       enable = mkEnableOption "A modern dashboard for dae";
 
-      package = mkPackageOption (withSystem pkgs.system ({ config, ... }: config.packages)) "daed" {
+      package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "daed" {
         pkgsText = "flake.packages.$\{pkgs.system}.daed";
       };
 

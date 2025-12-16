@@ -25,6 +25,8 @@ let
       name = "dae-assets";
       inherit paths;
     };
+
+  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   # disables Nixpkgs dae module to avoid conflicts
@@ -34,7 +36,7 @@ in
     services.dae = {
       enable = mkEnableOption "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
-      package = mkPackageOption (withSystem pkgs.system ({ config, ... }: config.packages)) "dae" {
+      package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "dae" {
         pkgsText = "flake.packages.$\{pkgs.system}.dae";
       };
 
