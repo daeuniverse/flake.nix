@@ -9,13 +9,13 @@
 }:
 
 let
+  metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).daed.release;
   pname = "daed";
-  version = "1.0.0";
+  version = metadata.version;
   src = fetchFromGitHub {
     owner = "daeuniverse";
     repo = "daed";
-    tag = "v${version}";
-    hash = "sha256-WaybToEcFrKOcJ+vfCTc9uyHkTPOrcAEw9lZFEIBPgY=";
+    inherit (metadata) rev hash;
     fetchSubmodules = true;
   };
 
@@ -25,7 +25,7 @@ let
     pnpmDeps = pnpm.fetchDeps {
       inherit pname version src;
       fetcherVersion = 2;
-      hash = "sha256-N85njUxA4iQJCItCG40uroEuCAQiazHm31nrnOiIKZY=";
+      hash = metadata.pnpmDepsHash;
     };
 
     nativeBuildInputs = [
@@ -51,7 +51,7 @@ buildGoModule rec {
   inherit pname version src;
   sourceRoot = "${src.name}/wing";
 
-  vendorHash = "sha256-+uf8PJQvsJMUyQ6W+nDfdwrxBO2YRUL328ajTJpVDZk=";
+  vendorHash = metadata.vendorHash;
   proxyVendor = true;
 
   nativeBuildInputs = [ clang ];
