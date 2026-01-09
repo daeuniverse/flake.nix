@@ -15,11 +15,11 @@
   },
   "daed": {
     "release": {
-      "version": "1.0.0",
-      "rev": "v1.0.0",
-      "hash": "sha256-WaybToEcFrKOcJ+vfCTc9uyHkTPOrcAEw9lZFEIBPgY=",
-      "pnpmDepsHash": "sha256-N85njUxA4iQJCItCG40uroEuCAQiazHm31nrnOiIKZY=",
-      "vendorHash": "sha256-+uf8PJQvsJMUyQ6W+nDfdwrxBO2YRUL328ajTJpVDZk="
+      "version": "1.21.1",
+      "rev": "v1.21.1",
+      "hash": "sha256-d8qNM9GQCzZvjH81+i28fhAt3Kyd0k5q4HlxL4js62w=",
+      "pnpmDepsHash": "sha256-29DuVhwDsLAd17Zn8eEBhtxun+UaTs4I1Ox9QvYTSlQ=",
+      "vendorHash": "sha256-l7jgMvrbpOY2+cvnc0e5cvSgKVm4GcWC+bPbff+PE80="
     }
   }
 }
