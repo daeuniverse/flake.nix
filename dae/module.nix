@@ -173,7 +173,8 @@ in
               ExecStartPre = [
                 ""
                 "${daeBin} validate -c ${configPath}"
-              ] ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
+              ]
+              ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
               ExecStart = [
                 ""
                 "${daeBin} run --disable-timestamp -c ${configPath}"

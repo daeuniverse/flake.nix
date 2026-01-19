@@ -25,7 +25,12 @@ let
     inherit pname version src;
 
     pnpmDeps = fetchPnpmDeps {
-      inherit pname version src pnpm;
+      inherit
+        pname
+        version
+        src
+        pnpm
+        ;
       fetcherVersion = 3;
       hash = metadata.pnpmDepsHash;
     };
