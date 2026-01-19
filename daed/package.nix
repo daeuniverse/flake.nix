@@ -13,7 +13,7 @@
 let
   metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).daed.release;
   pname = "daed";
-  version = metadata.version;
+  inherit (metadata) version;
   src = fetchFromGitHub {
     owner = "daeuniverse";
     repo = "daed";
@@ -54,7 +54,7 @@ buildGoModule rec {
   inherit pname version src;
   sourceRoot = "${src.name}/wing";
 
-  vendorHash = metadata.vendorHash;
+  inherit (metadata) vendorHash;
   proxyVendor = true;
 
   nativeBuildInputs = [ clang ];

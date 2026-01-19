@@ -26,7 +26,7 @@ let
       inherit paths;
     };
 
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
   # disables Nixpkgs dae module to avoid conflicts
