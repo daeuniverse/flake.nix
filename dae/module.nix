@@ -26,7 +26,7 @@ let
       inherit paths;
     };
 
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
   # disables Nixpkgs dae module to avoid conflicts
@@ -173,7 +173,8 @@ in
               ExecStartPre = [
                 ""
                 "${daeBin} validate -c ${configPath}"
-              ] ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
+              ]
+              ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
               ExecStart = [
                 ""
                 "${daeBin} run --disable-timestamp -c ${configPath}"

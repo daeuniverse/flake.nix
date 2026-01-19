@@ -1,5 +1,7 @@
 {
   pnpm,
+  fetchPnpmDeps,
+  pnpmConfigHook,
   nodejs,
   stdenv,
   clang,
@@ -9,28 +11,34 @@
 }:
 
 let
+  metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).daed.release;
   pname = "daed";
-  version = "1.0.0";
+  inherit (metadata) version;
   src = fetchFromGitHub {
     owner = "daeuniverse";
     repo = "daed";
-    tag = "v${version}";
-    hash = "sha256-WaybToEcFrKOcJ+vfCTc9uyHkTPOrcAEw9lZFEIBPgY=";
+    inherit (metadata) rev hash;
     fetchSubmodules = true;
   };
 
   web = stdenv.mkDerivation {
     inherit pname version src;
 
-    pnpmDeps = pnpm.fetchDeps {
-      inherit pname version src;
-      fetcherVersion = 2;
-      hash = "sha256-N85njUxA4iQJCItCG40uroEuCAQiazHm31nrnOiIKZY=";
+    pnpmDeps = fetchPnpmDeps {
+      inherit
+        pname
+        version
+        src
+        pnpm
+        ;
+      fetcherVersion = 3;
+      hash = metadata.pnpmDepsHash;
     };
 
     nativeBuildInputs = [
       nodejs
-      pnpm.configHook
+      pnpm
+      pnpmConfigHook
     ];
 
     buildPhase = ''
@@ -42,7 +50,7 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out
-      cp -R dist/* $out/
+      cp -R apps/web/dist/* $out/
       runHook postInstall
     '';
   };
@@ -51,7 +59,7 @@ buildGoModule rec {
   inherit pname version src;
   sourceRoot = "${src.name}/wing";
 
-  vendorHash = "sha256-+uf8PJQvsJMUyQ6W+nDfdwrxBO2YRUL328ajTJpVDZk=";
+  inherit (metadata) vendorHash;
   proxyVendor = true;
 
   nativeBuildInputs = [ clang ];
