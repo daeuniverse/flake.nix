@@ -2,12 +2,12 @@
   lib,
   clang,
   fetchFromGitHub,
-  buildGoModule,
+  buildGoLatestModule,
 }:
 let
   metadata = (builtins.fromJSON (builtins.readFile ../metadata.json)).dae.release;
 in
-buildGoModule rec {
+buildGoLatestModule rec {
   pname = "dae";
   inherit (metadata) version vendorHash;
 

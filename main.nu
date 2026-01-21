@@ -42,7 +42,8 @@ def "main sync" [
       return;
     }
     let stderr = $res.stderr;
-    let vendor_hash = $stderr | lines | find --regex "got:" | str trim | split row " " | last
+    log info $"got stderr:(char newline)($stderr)";
+    let vendor_hash = $stderr | lines | find --regex "got:" -n | str trim | split row " " | last
     $vendor_hash
   }
   mut metadata = open ./metadata.json
