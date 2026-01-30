@@ -17,7 +17,7 @@ let
 
   cfg = config.services.daed;
 
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
   # disables Nixpkgs daed module to avoid conflicts

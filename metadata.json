@@ -12,5 +12,14 @@
       "hash": "sha256-PItrloo7FiiEXUqihT7U94JL/K64q84wwOeSzAxyZh8=",
       "vendorHash": "sha256-MJVmAg+xyS53295FZ5HYB4rfbWHjUFBkxIOBxqxQP3U="
     }
+  },
+  "daed": {
+    "release": {
+      "version": "1.21.1",
+      "rev": "v1.21.1",
+      "hash": "sha256-d8qNM9GQCzZvjH81+i28fhAt3Kyd0k5q4HlxL4js62w=",
+      "pnpmDepsHash": "sha256-29DuVhwDsLAd17Zn8eEBhtxun+UaTs4I1Ox9QvYTSlQ=",
+      "vendorHash": "sha256-l7jgMvrbpOY2+cvnc0e5cvSgKVm4GcWC+bPbff+PE80="
+    }
   }
 }
