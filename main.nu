@@ -59,7 +59,7 @@ def "main sync" [
         let tag = http get $'https://api.github.com/repos/daeuniverse/($project)/releases/latest' | $in.tag_name;
         let branch_info = do $get_branch_info $tag;
         let hash = $branch_info | $in.hash;
-        if ($hash == $metadata.dae.release.hash) {
+        if ($hash == ($metadata | get $project).release.hash) {
           log info "latest release hash identical. skip"
           # consider the vendorHash already exist
           continue
@@ -80,7 +80,7 @@ def "main sync" [
         let date = $branch_info | $in.date | format date "%Y-%m-%d"
         let version = $'unstable-($date).($short_hash)'
 
-        if ($branch_info.hash == $metadata.dae.unstable.hash) {
+        if ($branch_info.hash == ($metadata | get $project).unstable.hash) {
           log info "rev identical. skip"
           continue
         }
