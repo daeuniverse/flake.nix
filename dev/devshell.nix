@@ -7,6 +7,7 @@
         packages = [
           inputs.nix-eval-jobs.outputs.packages.${system}.default
           pkgs.cachix
+          pkgs.nix-prefetch-git
           pkgs.nushell
         ];
       };
