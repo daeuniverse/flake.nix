@@ -73,6 +73,7 @@ jobs:
 
       - name: Push to sync-target
         run: |
+          git push origin --delete sync-target || true
           git checkout -b sync-target
           git push -u origin sync-target
 
