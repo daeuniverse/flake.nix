@@ -31,7 +31,7 @@ let
         src
         pnpm
         ;
-      fetcherVersion = 3;
+      fetcherVersion = 4;
       hash = metadata.pnpmDepsHash;
     };
 

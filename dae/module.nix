@@ -54,9 +54,9 @@ in
         type = types.str;
         default = "${genAssetsDrv assets}/share/v2ray";
         defaultText = literalExpression ''
-          "$\{(symlinkJoin {
-              name = "dae-assets";
-              paths = assets;
+          "$${(pkgs.symlinkJoin {
+            name = "dae-assets";
+            paths = assets;
           })}/share/v2ray"
         '';
         description = ''
