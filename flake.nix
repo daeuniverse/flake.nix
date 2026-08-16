@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    crane.url = "github:ipetkov/crane";
   };
 
   outputs =
@@ -50,13 +55,17 @@
             ...
           }:
           {
-            _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+            _module.args.pkgs = import inputs.nixpkgs {
+              inherit system;
+              overlays = [ inputs.rust-overlay.overlays.default ];
+            };
 
             overlayAttrs = config.packages;
 
             packages =
               let
                 metadata = builtins.fromJSON (builtins.readFile ./metadata.json);
+                craneLib = inputs.crane.mkLib pkgs;
               in
               # dae subspecies
               (
@@ -90,9 +99,32 @@
                 in
                 lib.listToAttrs (lib.map (v: lib.nameValuePair "dae-${v}" (daeBorn metadata.dae.${v})) daeVers)
               )
+              // (
+                let
+                  honkBorn =
+                    {
+                      version,
+                      rev,
+                      hash,
+                      vendorHash ? "",
+                    }:
+                    pkgs.callPackage ./honk/package.nix {
+                      inherit craneLib version;
+                      src = pkgs.fetchFromGitHub {
+                        owner = "daeuniverse";
+                        repo = "honk";
+                        inherit rev hash;
+                        fetchSubmodules = true;
+                      };
+                    };
+                  honkVers = if builtins.hasAttr "honk" metadata then builtins.attrNames metadata.honk else [];
+                in
+                lib.listToAttrs (lib.map (v: lib.nameValuePair "honk-${v}" (honkBorn metadata.honk.${v})) honkVers)
+              )
               // {
                 daed = pkgs.callPackage ./daed/package.nix { };
                 dae = self'.packages.dae-release;
+                honk = self'.packages.honk-release;
               };
 
             formatter = pkgs.nixfmt-rfc-style;
