@@ -89,8 +89,18 @@ let
     cargoExtraArgs = "-p honk-core --features ebpf";
     doCheck = false; # Skip tests for now as they might require networking
 
+    postInstall = ''
+      if [ -f $out/bin/honk-core ]; then
+        mv $out/bin/honk-core $out/bin/honk
+      fi
+    '';
+
     meta = with lib; {
+      description = "A Linux high-performance transparent proxy solution based on eBPF (honk)";
+      homepage = "https://github.com/daeuniverse/honk";
+      license = licenses.gpl3Only;
       platforms = platforms.linux;
+      mainProgram = "honk";
     };
   });
 in
