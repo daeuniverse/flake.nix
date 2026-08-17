@@ -8,7 +8,7 @@
 }:
 
 let
-  rustToolchain = pkgs.rust-bin.nightly."2026-07-20".default.override {
+  rustToolchain = pkgs.rust-bin.nightly."2025-10-01".default.override {
     extensions = [ "rust-src" ];
   };
 
