@@ -170,7 +170,8 @@ in
             serviceConfig = {
               ExecStartPre = [
                 ""
-              ] ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
+              ]
+              ++ (optional cfg.disableTxChecksumIpGeneric TxChecksumIpGenericWorkaround);
               ExecStart = [
                 ""
                 "${honkBin} -c ${configPath}"
