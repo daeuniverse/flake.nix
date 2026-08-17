@@ -19,7 +19,7 @@ let
     inherit src version;
     pname = "honk-ebpf";
     nativeBuildInputs = [ pkgs.bpf-linker ];
-    cargoExtraArgs = "--manifest-path crates/honk-ebpf/Cargo.toml -Zbuild-std=core --target bpfel-unknown-none";
+    cargoExtraArgs = "--manifest-path crates/honk-ebpf/Cargo.toml -Zbuild-std=core --target bpfel-unknown-none --config profile.release.debug=2";
     cargoToml = "${src}/crates/honk-ebpf/Cargo.toml";
     cargoLock = "${src}/crates/honk-ebpf/Cargo.lock";
     cargoVendorDir = craneLibNightly.vendorMultipleCargoDeps {
@@ -31,7 +31,6 @@ let
     };
     doCheck = false;
     dontStrip = true;
-    CARGO_PROFILE_RELEASE_DEBUG = "2";
   };
 
   ebpfArtifacts = craneLibNightly.buildDepsOnly ebpfArgs;
@@ -42,10 +41,13 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out/bin
-      binPath=$(find target crates/honk-ebpf/target -type f -name "honk-ebpf" -o -name "honk_ebpf" 2>/dev/null | grep "release/honk" | head -n 1)
-      if [ -z "$binPath" ]; then
-        echo "Could not find honk-ebpf binary in target directories. Here is what we found:"
-        find . -type f -name "honk*"
+      binPath="target/bpfel-unknown-none/release/honk-ebpf"
+      if [ ! -f "$binPath" ]; then
+        binPath="crates/honk-ebpf/target/bpfel-unknown-none/release/honk-ebpf"
+      fi
+      if [ ! -f "$binPath" ]; then
+        echo "Could not find honk-ebpf binary in target directories."
+        find . -type f -name "honk-ebpf"
         exit 1
       fi
       cp $binPath $out/bin/honk-ebpf
