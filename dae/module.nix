@@ -37,7 +37,7 @@ in
       enable = mkEnableOption "dae, a Linux high-performance transparent proxy solution based on eBPF";
 
       package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "dae" {
-        pkgsText = "flake.packages.$\{pkgs.system}.dae";
+        pkgsText = "flake.packages.\${pkgs.system}.dae";
       };
 
       assets = mkOption {

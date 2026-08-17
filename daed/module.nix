@@ -28,7 +28,7 @@ in
       enable = mkEnableOption "A modern dashboard for dae";
 
       package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "daed" {
-        pkgsText = "flake.packages.$\{pkgs.system}.daed";
+        pkgsText = "flake.packages.\${pkgs.system}.daed";
       };
 
       configDir = mkOption {
