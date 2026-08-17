@@ -8,8 +8,26 @@
 }:
 
 let
-  rustToolchain = pkgs.rust-bin.nightly."2025-10-01".default.override {
+  rustToolchain = pkgs.rust-bin.nightly."2026-07-20".default.override {
     extensions = [ "rust-src" ];
+  };
+
+  bpfLinker = pkgs.rustPlatform.buildRustPackage {
+    pname = "bpf-linker";
+    version = "git";
+    src = pkgs.fetchFromGitHub {
+      owner = "aya-rs";
+      repo = "bpf-linker";
+      rev = "faab7946344770cd5ea3671b9878c5d6e6393dc2";
+      hash = "sha256-XlKqNgQ6MzeJ/7/Ds7x9DC109QtUQsQ6u2y3gK1sW1o=";
+    };
+    cargoHash = "sha256-uQDXn+FfziMtZz0hwR8I5khMhAO8gt+MlO++N4OpC6I=";
+    buildNoDefaultFeatures = true;
+    buildFeatures = [ "llvm-21" ];
+    nativeBuildInputs = [ pkgs.llvm_21 pkgs.zlib pkgs.libxml2 pkgs.pkg-config ];
+    buildInputs = [ pkgs.llvm_21.lib pkgs.zlib pkgs.libxml2 ];
+    LLVM_SYS_211_PREFIX = "${pkgs.llvm_21.dev}";
+    doCheck = false;
   };
 
   craneLibNightly = craneLib.overrideToolchain rustToolchain;
@@ -18,10 +36,11 @@ let
   ebpfArgs = {
     inherit src version;
     pname = "honk-ebpf";
-    nativeBuildInputs = [ pkgs.bpf-linker ];
-    cargoExtraArgs = "--manifest-path crates/honk-ebpf/Cargo.toml -Zbuild-std=core --target bpfel-unknown-none --config profile.release.debug=2";
+    nativeBuildInputs = [ bpfLinker ];
+    cargoExtraArgs = "--manifest-path crates/honk-ebpf/Cargo.toml -Zbuild-std=core --target bpfel-unknown-none";
     cargoToml = "${src}/crates/honk-ebpf/Cargo.toml";
     cargoLock = "${src}/crates/honk-ebpf/Cargo.lock";
+    CARGO_BUILD_RUSTFLAGS = "-C opt-level=2 -C llvm-args=-inline-threshold=300 -C linker=bpf-linker -C debuginfo=2 -C link-arg=--emit=obj -C link-arg=--llvm-args=-bpf-stack-size=4096 -C link-arg=--btf";
     cargoVendorDir = craneLibNightly.vendorMultipleCargoDeps {
       cargoConfigs = [];
       cargoLockList = [
