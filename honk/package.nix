@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  stdenv,
   craneLib,
   src,
   version,

@@ -29,10 +29,9 @@ let
   inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
-  disabledModules = [ "services/networking/honk.nix" ];
 
   options = {
-    services.honk = {
+    services.honk-proxy = {
       enable = mkEnableOption "honk, a Linux high-performance transparent proxy solution based on eBPF";
 
       package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "honk" {

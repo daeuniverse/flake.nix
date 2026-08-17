@@ -136,6 +136,7 @@
             moduleName = [
               "dae"
               "daed"
+              "honk"
             ];
             genFlake = n: {
               nixosModules.${n} = flake-parts-lib.importApply ./${n}/module.nix {
