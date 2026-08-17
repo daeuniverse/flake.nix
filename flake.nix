@@ -117,14 +117,16 @@
                         fetchSubmodules = true;
                       };
                     };
-                  honkVers = if builtins.hasAttr "honk" metadata then builtins.attrNames metadata.honk else [];
+                  honkVers = if builtins.hasAttr "honk" metadata then
+                    lib.filter (v: metadata.honk.${v}.rev != "") (builtins.attrNames metadata.honk)
+                  else [];
                 in
                 lib.listToAttrs (lib.map (v: lib.nameValuePair "honk-${v}" (honkBorn metadata.honk.${v})) honkVers)
               )
               // {
                 daed = pkgs.callPackage ./daed/package.nix { };
                 dae = self'.packages.dae-release;
-                honk = self'.packages.honk-release;
+                honk = if builtins.hasAttr "honk-release" self'.packages then self'.packages.honk-release else self'.packages.honk-unstable;
               };
 
             formatter = pkgs.nixfmt-rfc-style;

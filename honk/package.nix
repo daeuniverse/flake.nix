@@ -30,6 +30,8 @@ let
       ];
     };
     doCheck = false;
+    dontStrip = true;
+    CARGO_PROFILE_RELEASE_DEBUG = "2";
   };
 
   ebpfArtifacts = craneLibNightly.buildDepsOnly ebpfArgs;
