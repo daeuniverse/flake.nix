@@ -9,7 +9,7 @@ def main [] {
   print -e "VERSIONS: List of versions to be updated."
   print -e "          e.g. release unstable"
   print -e $'(char newline)'
-  print -e "PROJECT:  Project to be update. Current only support dae."
+  print -e "PROJECT:  Project to be update. Current support dae, daed, and honk."
   print -e "          e.g. dae"
   print -e $'(char newline)'
   print -e 'example:'

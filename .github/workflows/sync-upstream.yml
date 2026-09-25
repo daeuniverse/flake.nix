@@ -9,6 +9,7 @@ on:
         options:
           - dae
           - daed
+          - honk
         required: true
       suffix:
         type: string

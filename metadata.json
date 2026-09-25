@@ -21,5 +21,19 @@
       "pnpmDepsHash": "sha256-9KfaLlAo//prhA26SQIbEnsk5b7h8+N3V5syickLTWM=",
       "vendorHash": "sha256-l7jgMvrbpOY2+cvnc0e5cvSgKVm4GcWC+bPbff+PE80="
     }
+  },
+  "honk": {
+    "unstable": {
+      "version": "unstable-2026-08-16.82f4a03",
+      "rev": "82f4a03d4fcc5f08c013d093ad0bb3266390ecee",
+      "hash": "sha256-v/w7kdwWemYTCgzCJ/b7e/yzHJX57/gXqJL2ueQsM28=",
+      "vendorHash": ""
+    },
+    "release": {
+      "version": "",
+      "rev": "",
+      "hash": "",
+      "vendorHash": ""
+    }
   }
 }
