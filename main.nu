@@ -27,7 +27,7 @@ def "main sync" [
                 ...versions,
                 --rev (-r): string = ""
                 ] {
-  use std log;
+  use std/log;
   let get_branch_info = {|rev| (nix-prefetch-git
                     -- --url $'https://github.com/daeuniverse/($project).git'
                        --rev $rev
@@ -43,7 +43,11 @@ def "main sync" [
     }
     let stderr = $res.stderr;
     log info $"got stderr:(char newline)($stderr)";
-    let vendor_hash = $stderr | lines | find --regex "got:" -n | str trim | split row " " | last
+    let hash_lines = $stderr | lines | find --regex "got:" -n;
+    if ($hash_lines | is-empty) {
+      error make {msg: $"Build failed for ($project)-($v). See the build log above."}
+    }
+    let vendor_hash = $hash_lines | str trim | split row " " | last
     $vendor_hash
   }
   mut metadata = open ./metadata.json

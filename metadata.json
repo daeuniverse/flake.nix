@@ -24,9 +24,9 @@
   },
   "honk": {
     "unstable": {
-      "version": "unstable-2026-08-16.82f4a03",
-      "rev": "82f4a03d4fcc5f08c013d093ad0bb3266390ecee",
-      "hash": "sha256-v/w7kdwWemYTCgzCJ/b7e/yzHJX57/gXqJL2ueQsM28=",
+      "version": "unstable-2026-10-24.375d0ae",
+      "rev": "375d0ae8e01a515e78843e50247dee4067030166",
+      "hash": "sha256-Tfo687/24Hz4+Kb4h0PTxvWUMGz76Ze402K2aTZHiLA=",
       "vendorHash": ""
     },
     "release": {

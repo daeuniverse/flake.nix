@@ -7,34 +7,25 @@
 }:
 
 let
-  rustToolchain = pkgs.rust-bin.nightly."2025-10-01".default.override {
-    extensions = [ "rust-src" ];
-  };
+  rustToolchain = pkgs.rust-bin.fromRustupToolchainFile "${src}/crates/honk-ebpf/rust-toolchain.toml";
 
-  bpfLinker = pkgs.rustPlatform.buildRustPackage {
+  bpfLinker = craneLibNightly.buildPackage {
     pname = "bpf-linker";
-    version = "git";
+    version = "0.12.0-unstable-2026-10-23";
     src = pkgs.fetchFromGitHub {
       owner = "aya-rs";
       repo = "bpf-linker";
-      rev = "faab7946344770cd5ea3671b9878c5d6e6393dc2";
-      hash = "sha256-XlKqNgQ6MzeJ/7/Ds7x9DC109QtUQsQ6u2y3gK1sW1o=";
+      rev = "f4a30595b407a9f7dbc1dfa38c4cbdd37a0d9f90";
+      hash = "sha256-rvD6xL8ygSNrB5N2qi08S7vKmPrfcc0VzOpOpnjQIAY=";
     };
-    cargoHash = "sha256-uQDXn+FfziMtZz0hwR8I5khMhAO8gt+MlO++N4OpC6I=";
-    buildNoDefaultFeatures = true;
-    buildFeatures = [ "llvm-21" ];
-    nativeBuildInputs = [
-      pkgs.llvm_21
-      pkgs.zlib
-      pkgs.libxml2
-      pkgs.pkg-config
-    ];
-    buildInputs = [
-      pkgs.llvm_21.lib
-      pkgs.zlib
-      pkgs.libxml2
-    ];
-    LLVM_SYS_211_PREFIX = "${pkgs.llvm_21.dev}";
+    cargoExtraArgs = "--no-default-features --features llvm-23";
+    nativeBuildInputs = [ pkgs.clang ];
+    # Use the same LLVM library as the eBPF Rust compiler.
+    LLVM_PREFIX = pkgs.runCommand "honk-bpf-llvm" { } ''
+      mkdir -p $out/lib
+      ln -s ${rustToolchain}/lib/libLLVM* $out/lib/
+      ln -s ${rustToolchain}/lib/libLLVM.so.* $out/lib/libLLVM.so
+    '';
     doCheck = false;
   };
 
@@ -103,15 +94,18 @@ let
       openssl
     ];
 
-    # Empty out build.rs so it doesn't try to build the eBPF object
+    env.GITHUB_REF = "refs/tags/${version}";
+
+    # Nix builds the eBPF object separately.
     postPatch = ''
       if [ -f crates/honk-core/build.rs ]; then
-        echo "fn main() {}" > crates/honk-core/build.rs
+        substituteInPlace crates/honk-core/build.rs \
+          --replace-fail '    embed_ebpf_object();' '    {}'
       fi
     '';
   };
 
-  rustToolchainStable = pkgs.rust-bin.stable.latest.default;
+  rustToolchainStable = pkgs.rust-bin.fromRustupToolchainFile "${src}/rust-toolchain.toml";
   craneLibStable = craneLib.overrideToolchain rustToolchainStable;
 
   cargoArtifacts = craneLibStable.buildDepsOnly commonArgs;
