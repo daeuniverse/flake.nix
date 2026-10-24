@@ -17,7 +17,7 @@ let
     mkPackageOption
     ;
 
-  cfg = config.services.honk;
+  cfg = config.services.honk-proxy;
   inherit (cfg) assets;
   genAssetsDrv =
     paths:
@@ -193,8 +193,8 @@ in
           {
             assertion =
               let
-                A = config.services.honk.config == null;
-                B = config.services.honk.configFile == null;
+                A = cfg.config == null;
+                B = cfg.configFile == null;
               in
               (A && !B) || (!A && B); # xor
             message = ''
