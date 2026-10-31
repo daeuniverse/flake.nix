@@ -17,7 +17,7 @@ let
     mkPackageOption
     ;
 
-  cfg = config.services.honk-proxy;
+  cfg = config.services.honk-core;
   inherit (cfg) assets;
   genAssetsDrv =
     paths:
@@ -31,7 +31,7 @@ in
 {
 
   options = {
-    services.honk-proxy = {
+    services.honk-core = {
       enable = mkEnableOption "honk, a Linux high-performance transparent proxy solution based on eBPF";
 
       package = mkPackageOption (withSystem system ({ config, ... }: config.packages)) "honk" {
@@ -150,7 +150,7 @@ in
             };
         };
 
-        systemd.services.honk =
+        systemd.services.honk-core =
           let
             honkBin = getExe cfg.package;
 
@@ -166,6 +166,8 @@ in
           in
           {
             wantedBy = [ "multi-user.target" ];
+            # honk and dae attach to the same interfaces, as upstream honk-core.service declares.
+            conflicts = [ "dae.service" ];
             reloadTriggers = [ cfg.config ];
             serviceConfig = {
               ExecStartPre = [

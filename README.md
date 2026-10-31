@@ -27,7 +27,7 @@
 }
 ```
 
-2. Enable dae or daed module. `honk` module keeps basically the same as dae, use `services.honk-proxy`.
+2. Enable dae or daed module. `honk` module keeps basically the same as dae, use `services.honk-core`.
 
 > [!NOTE]
 > To see full options, check `dae{,d}/module.nix`.
