@@ -41,9 +41,11 @@ let
       pnpmConfigHook
     ];
 
+    env.NODE_OPTIONS = "--max-old-space-size=4096";
+
     buildPhase = ''
       runHook preBuild
-      pnpm build
+      pnpm build --env-mode=loose
       runHook postBuild
     '';
 
